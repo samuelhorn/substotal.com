@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Globe } from "lucide-react";
+import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -37,6 +38,16 @@ interface SubscriptionTableProps {
 
 type SortColumn = "name" | "amount" | "frequency" | "category" | "startDate";
 type SortDirection = "asc" | "desc";
+
+function getFaviconUrl(url: string | undefined) {
+    if (!url) return null;
+    try {
+        const urlObj = new URL(url);
+        return `https://www.google.com/s2/favicons?domain=${urlObj.hostname}/${urlObj.pathname}&sz=32&prefer_dark=1`;
+    } catch {
+        return null;
+    }
+}
 
 export function SubscriptionTable({
     subscriptions,
@@ -110,6 +121,7 @@ export function SubscriptionTable({
             <Table>
                 <TableHeader>
                     <TableRow>
+                        <TableHead className="w-[30px]"></TableHead>
                         <TableHead
                             className="cursor-pointer"
                             onClick={() => handleSort("name")}
@@ -148,14 +160,46 @@ export function SubscriptionTable({
                 <TableBody>
                     {sortedSubscriptions.length === 0 ? (
                         <TableRow>
-                            <TableCell colSpan={8} className="text-center text-muted-foreground py-6">
+                            <TableCell colSpan={9} className="text-center text-muted-foreground py-6">
                                 No subscriptions added yet
                             </TableCell>
                         </TableRow>
                     ) : (
                         sortedSubscriptions.map((subscription) => (
                             <TableRow key={subscription.id}>
-                                <TableCell className="font-medium">{subscription.name}</TableCell>
+                                <TableCell className="w-[30px]">
+                                    {subscription.url ? (
+                                        <div className="relative w-6 h-6">
+                                            <Image
+                                                src={getFaviconUrl(subscription.url) || '/globe.svg'}
+                                                alt={`${subscription.name} favicon`}
+                                                className="rounded-sm"
+                                                width={24}
+                                                height={24}
+                                                onError={(e) => {
+                                                    const img = e.target as HTMLImageElement;
+                                                    img.src = '/globe.svg';
+                                                }}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <Globe className="w-5 h-5 text-muted-foreground" />
+                                    )}
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                    {subscription.url ? (
+                                        <a
+                                            href={subscription.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="hover:underline"
+                                        >
+                                            {subscription.name}
+                                        </a>
+                                    ) : (
+                                        subscription.name
+                                    )}
+                                </TableCell>
                                 <TableCell>
                                     {formatCurrency(subscription.amount, subscription.currency)}
                                 </TableCell>

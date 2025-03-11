@@ -61,6 +61,7 @@ const CURRENCIES = [
     "AUD",
     "JPY",
     "CNY",
+    "SEK"
 ];
 
 interface SubscriptionFormDialogProps {
@@ -108,6 +109,7 @@ export function SubscriptionFormDialog({
             commitmentEndDate: subscription?.commitmentEndDate,
             category: subscription?.category || "Other",
             currency: subscription?.currency || "USD",
+            url: subscription?.url || "",
         },
     });
 
@@ -130,6 +132,7 @@ export function SubscriptionFormDialog({
                 commitmentEndDate: undefined,
                 category: "Other",
                 currency: "USD",
+                url: "",
             });
         }
         setIsOpen(false);
@@ -146,6 +149,25 @@ export function SubscriptionFormDialog({
                             <FormLabel>Name</FormLabel>
                             <FormControl>
                                 <Input placeholder="Netflix" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="url"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Service URL (Optional)</FormLabel>
+                            <FormControl>
+                                <Input
+                                    type="url"
+                                    placeholder="https://netflix.com"
+                                    {...field}
+                                    value={field.value || ""}
+                                />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
