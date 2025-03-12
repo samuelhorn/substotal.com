@@ -9,16 +9,41 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Format options for currency display
+ */
+export type CurrencyFormatOptions = {
+  /** Whether to show decimals (defaults to true) */
+  showDecimals?: boolean;
+  /** The locale to use for formatting (defaults to "en-US") */
+  locale?: string;
+  /** How to display the currency (symbol, code, or name) */
+  currencyDisplay?: "symbol" | "narrowSymbol" | "code" | "name";
+};
+
+/**
  * Format a number as currency
  * @param amount Number to format
  * @param currency Currency code
+ * @param options Formatting options
  * @returns Formatted currency string
  */
-export function formatCurrency(amount: number, currency: string = "USD"): string {
-  return new Intl.NumberFormat("en-US", {
+export function formatCurrency(
+  amount: number,
+  currency: string = "USD",
+  options?: CurrencyFormatOptions
+): string {
+  const {
+    showDecimals = true,
+    locale = "en-US",
+    currencyDisplay = "narrowSymbol"
+  } = options || {};
+
+  return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
-    minimumFractionDigits: 2,
+    minimumFractionDigits: showDecimals ? 2 : 0,
+    maximumFractionDigits: showDecimals ? 2 : 0,
+    currencyDisplay: currencyDisplay,
   }).format(amount);
 }
 

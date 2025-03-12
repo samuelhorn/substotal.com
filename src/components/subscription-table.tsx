@@ -31,6 +31,7 @@ import { Switch } from "@/components/ui/switch";
 
 import { Subscription, calculateMonthlyCost, calculateYearlyCost } from "@/lib/subscriptions";
 import { convertAmount } from "@/lib/currency";
+import { formatCurrency } from "@/lib/utils";
 
 interface SubscriptionTableProps {
     subscriptions: Subscription[];
@@ -111,23 +112,24 @@ export function SubscriptionTable({
         }
     };
 
-    const formatCurrency = (amount: number, currency: string) => {
-        return new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency,
-            minimumFractionDigits: 2,
-        }).format(amount);
-    };
-
-    const formatAmount = (amount: number, fromCurrency: string) => {
-        const originalAmount = formatCurrency(amount, fromCurrency);
+    // Use our new improved formatCurrency utility
+    const formatAmountDisplay = (amount: number, fromCurrency: string) => {
+        // Format original amount with symbol position based on currency
+        const originalAmount = formatCurrency(amount, fromCurrency, {
+            showDecimals: true,
+            currencyDisplay: "narrowSymbol"
+        });
 
         if (fromCurrency === primaryCurrency) {
             return originalAmount;
         }
 
+        // Convert amount to primary currency and format consistently
         const convertedAmount = convertAmount(amount, fromCurrency, primaryCurrency, exchangeRates);
-        return `${originalAmount} (${formatCurrency(convertedAmount, primaryCurrency)})`;
+        return `${originalAmount} (${formatCurrency(convertedAmount, primaryCurrency, {
+            showDecimals: true,
+            currencyDisplay: "narrowSymbol"
+        })})`;
     };
 
     const getSortIcon = (column: SortColumn) => {
@@ -222,18 +224,18 @@ export function SubscriptionTable({
                                         subscription.name
                                     )}
                                 </TableCell>
-                                <TableCell>{formatAmount(subscription.amount, subscription.currency)}</TableCell>
+                                <TableCell>{formatAmountDisplay(subscription.amount, subscription.currency)}</TableCell>
                                 <TableCell className="capitalize">{subscription.frequency}</TableCell>
                                 <TableCell>{subscription.category}</TableCell>
                                 <TableCell>{format(new Date(subscription.startDate), "MMM d, yyyy")}</TableCell>
                                 <TableCell>
-                                    {formatAmount(
+                                    {formatAmountDisplay(
                                         calculateMonthlyCost(subscription),
                                         subscription.currency
                                     )}
                                 </TableCell>
                                 <TableCell>
-                                    {formatAmount(
+                                    {formatAmountDisplay(
                                         calculateYearlyCost(subscription),
                                         subscription.currency
                                     )}

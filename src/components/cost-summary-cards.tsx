@@ -13,6 +13,7 @@ import {
     calculateLockedInCost,
     Subscription
 } from "@/lib/subscriptions";
+import { formatCurrency } from "@/lib/utils";
 import { motion, useSpring, useMotionValue, useTransform } from "motion/react";
 import { useEffect } from "react";
 
@@ -54,17 +55,15 @@ export function CostSummaryCards({
     primaryCurrency = "USD",
     exchangeRates
 }: CostSummaryCardsProps) {
-    const formatCurrency = (amount: number) => {
-        // Force to whole numbers for all amounts by rounding
+    const formatCurrencyForDisplay = (amount: number) => {
+        // Force to whole numbers for summary cards by rounding
         const roundedAmount = Math.round(amount);
 
-        // Use integer formatting for all currency values
-        return new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: primaryCurrency,
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-        }).format(roundedAmount);
+        // Use consistent formatting with our utility
+        return formatCurrency(roundedAmount, primaryCurrency, {
+            showDecimals: false, // Don't show decimals in the cards
+            currencyDisplay: "narrowSymbol" // Use narrow symbol format for consistency
+        });
     };
 
     const monthlyCost = calculateTotalMonthlyCost(subscriptions, primaryCurrency, exchangeRates);
@@ -79,7 +78,7 @@ export function CostSummaryCards({
                     <CalendarDays className="h-6 w-6 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                    <AnimatedCounter value={monthlyCost} formatter={formatCurrency} />
+                    <AnimatedCounter value={monthlyCost} formatter={formatCurrencyForDisplay} />
                     <p className="text-sm mt-4 font-thin text-muted-foreground mt-1">
                         Total monthly subscription expenses
                     </p>
@@ -92,7 +91,7 @@ export function CostSummaryCards({
                     <CalendarRange className="h-6 w-6 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                    <AnimatedCounter value={yearlyCost} formatter={formatCurrency} />
+                    <AnimatedCounter value={yearlyCost} formatter={formatCurrencyForDisplay} />
                     <p className="text-sm mt-4 font-thin text-muted-foreground mt-1">
                         Total annual subscription expenses
                     </p>
@@ -105,7 +104,7 @@ export function CostSummaryCards({
                     <LockIcon className="h-6 w-6 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                    <AnimatedCounter value={lockedInCost} formatter={formatCurrency} />
+                    <AnimatedCounter value={lockedInCost} formatter={formatCurrencyForDisplay} />
                     <p className="text-sm mt-4 font-thin text-muted-foreground mt-1">
                         Committed expenses you can't cancel yet
                     </p>
