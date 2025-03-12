@@ -18,8 +18,9 @@ export function CurrencySelect({ value, onValueChange }: CurrencySelectProps) {
     return (
         <div className="flex items-center gap-2">
             <Select value={value} onValueChange={onValueChange}>
-                <SelectTrigger className="w-[100px]">
-                    <SelectValue placeholder="Currency" />
+                <SelectTrigger>
+                    <span className="mr-1 text-muted-foreground">Display currency:</span>
+                    <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
                     {CURRENCIES.map((currency) => (

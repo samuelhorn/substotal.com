@@ -11,7 +11,8 @@ import {
     ResponsiveContainer,
     LineChart,
     Line,
-    TooltipProps
+    TooltipProps,
+    Cell,
 } from "recharts";
 import { useState } from "react";
 
@@ -145,7 +146,12 @@ export function SubscriptionCharts({
             <Card>
                 <CardHeader>
                     <div className="flex items-center justify-between">
-                        <CardTitle>Category Breakdown</CardTitle>
+                        <div className="flex flex-col gap-1.5">
+                            <CardTitle>Category Breakdown</CardTitle>
+                            <CardDescription>
+                                Your {viewMode === 'yearly' ? 'yearly' : 'monthly'} expenses by category
+                            </CardDescription>
+                        </div>
                         <div className="flex items-center space-x-2">
                             <Label htmlFor="view-mode">Yearly View</Label>
                             <Switch
@@ -180,12 +186,31 @@ export function SubscriptionCharts({
                                         `${viewMode === 'monthly' ? 'Monthly' : 'Yearly'} Cost`,
                                     ]}
                                 />
-                                <Bar dataKey="value" fill="#3b82f6" />
+                                <Bar
+                                    dataKey="value"
+                                    fill="#8B4513"  // Saddle Brown
+                                >
+                                    {
+                                        categoryData.map((entry, index) => (
+                                            <Cell
+                                                key={`cell-${index}`}
+                                                fill={[
+                                                    '#8B4513',  // Saddle Brown
+                                                    '#A0522D',  // Sienna
+                                                    '#6B4423',  // Dark Brown
+                                                    '#8B7355',  // Taupe
+                                                    '#CD853F',  // Peru
+                                                    '#DEB887',  // Burlywood
+                                                ][index % 6]}
+                                            />
+                                        ))
+                                    }
+                                </Bar>
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
                 </CardContent>
-            </Card>
+            </Card >
 
             <Card>
                 <CardHeader>
@@ -214,7 +239,7 @@ export function SubscriptionCharts({
                                 <Line
                                     type="monotone"
                                     dataKey="value"
-                                    stroke="#3b82f6"
+                                    stroke="none"
                                     dot={true}
                                 />
                             </LineChart>

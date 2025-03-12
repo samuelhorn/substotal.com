@@ -17,6 +17,7 @@ import {
   deleteSubscription
 } from "@/lib/subscriptions";
 import { getExchangeRates, PRIMARY_CURRENCY_KEY } from "@/lib/currency";
+import { Label } from "@/components/ui/label";
 
 export default function Home() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);

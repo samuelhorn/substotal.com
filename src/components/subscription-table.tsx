@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { MoreHorizontal, Pencil, Trash2, Globe, EyeOff } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Globe, EyeOff, Eye } from "lucide-react";
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
@@ -172,7 +172,7 @@ export function SubscriptionTable({
                         </TableHead>
                         <TableHead>Monthly Cost</TableHead>
                         <TableHead>Yearly Cost</TableHead>
-                        <TableHead className="text-center">Hidden</TableHead>
+                        <TableHead className="text-center">Visibility</TableHead>
                         <TableHead>Actions</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -185,7 +185,7 @@ export function SubscriptionTable({
                         </TableRow>
                     ) : (
                         sortedSubscriptions.map((subscription) => (
-                            <TableRow 
+                            <TableRow
                                 key={subscription.id}
                                 className={subscription.hidden ? "opacity-50" : ""}
                             >
@@ -240,13 +240,17 @@ export function SubscriptionTable({
                                 </TableCell>
                                 <TableCell className="text-center">
                                     <div className="flex items-center justify-center gap-2">
-                                        <Switch
-                                            checked={subscription.hidden}
-                                            onCheckedChange={() => handleToggleHidden(subscription)}
-                                        />
-                                        {subscription.hidden && (
-                                            <EyeOff className="h-4 w-4 text-muted-foreground" />
-                                        )}
+                                        <Button
+                                            variant="ghost"
+                                            className="p-1"
+                                            onClick={() => handleToggleHidden(subscription)}
+                                        >
+                                            {subscription.hidden ? (
+                                                <EyeOff className="h-4 w-4 text-foreground" />
+                                            ) : (
+                                                <Eye className="h-4 w-4 text-foreground" />
+                                            )}
+                                        </Button>
                                     </div>
                                 </TableCell>
                                 <TableCell>
