@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { convertAmount } from "./currency";
 
 // Define the subscription schema
 export const subscriptionSchema = z.object({
@@ -78,38 +79,48 @@ export function getSubscriptionById(id: string): Subscription | undefined {
     return subscriptions.find(sub => sub.id === id);
 }
 
-// Helper function to calculate monthly cost
-export function calculateMonthlyCost(subscription: Subscription): number {
-    return subscription.frequency === "monthly"
+// Helper function to calculate monthly cost with currency conversion
+export function calculateMonthlyCost(subscription: Subscription, targetCurrency?: string, rates?: Record<string, number>): number {
+    const baseAmount = subscription.frequency === "monthly"
         ? subscription.amount
         : subscription.amount / 12;
+
+    if (targetCurrency && rates && targetCurrency !== subscription.currency) {
+        return convertAmount(baseAmount, subscription.currency, targetCurrency, rates);
+    }
+    return baseAmount;
 }
 
-// Helper function to calculate yearly cost
-export function calculateYearlyCost(subscription: Subscription): number {
-    return subscription.frequency === "yearly"
+// Helper function to calculate yearly cost with currency conversion
+export function calculateYearlyCost(subscription: Subscription, targetCurrency?: string, rates?: Record<string, number>): number {
+    const baseAmount = subscription.frequency === "yearly"
         ? subscription.amount
         : subscription.amount * 12;
+
+    if (targetCurrency && rates && targetCurrency !== subscription.currency) {
+        return convertAmount(baseAmount, subscription.currency, targetCurrency, rates);
+    }
+    return baseAmount;
 }
 
-// Calculate total monthly cost
-export function calculateTotalMonthlyCost(subscriptions: Subscription[]): number {
+// Calculate total monthly cost in target currency
+export function calculateTotalMonthlyCost(subscriptions: Subscription[], targetCurrency?: string, rates?: Record<string, number>): number {
     return subscriptions.reduce(
-        (total, sub) => total + calculateMonthlyCost(sub),
+        (total, sub) => total + calculateMonthlyCost(sub, targetCurrency, rates),
         0
     );
 }
 
-// Calculate total yearly cost
-export function calculateTotalYearlyCost(subscriptions: Subscription[]): number {
+// Calculate total yearly cost in target currency
+export function calculateTotalYearlyCost(subscriptions: Subscription[], targetCurrency?: string, rates?: Record<string, number>): number {
     return subscriptions.reduce(
-        (total, sub) => total + calculateYearlyCost(sub),
+        (total, sub) => total + calculateYearlyCost(sub, targetCurrency, rates),
         0
     );
 }
 
-// Calculate locked-in costs (subscriptions that can't be canceled yet)
-export function calculateLockedInCost(subscriptions: Subscription[]): number {
+// Calculate locked-in costs in target currency
+export function calculateLockedInCost(subscriptions: Subscription[], targetCurrency?: string, rates?: Record<string, number>): number {
     const today = new Date();
 
     return subscriptions
@@ -123,13 +134,19 @@ export function calculateLockedInCost(subscriptions: Subscription[]): number {
             const monthsLeft = (endDate.getFullYear() - today.getFullYear()) * 12 +
                 (endDate.getMonth() - today.getMonth());
 
+            let amount;
             if (sub.frequency === "monthly") {
-                return total + (sub.amount * Math.max(0, monthsLeft));
+                amount = sub.amount * Math.max(0, monthsLeft);
             } else {
                 // For yearly, calculate the remaining amount
                 const monthlyAmount = sub.amount / 12;
-                return total + (monthlyAmount * Math.max(0, monthsLeft));
+                amount = monthlyAmount * Math.max(0, monthsLeft);
             }
+
+            if (targetCurrency && rates && targetCurrency !== sub.currency) {
+                amount = convertAmount(amount, sub.currency, targetCurrency, rates);
+            }
+            return total + amount;
         }, 0);
 }
 

@@ -8,6 +8,7 @@ import { SubscriptionTable } from "@/components/subscription-table";
 import { CostSummaryCards } from "@/components/cost-summary-cards";
 import { SubscriptionCharts } from "@/components/subscription-charts";
 import { Separator } from "@/components/ui/separator";
+import { CurrencySelect } from "@/components/currency-select";
 import {
   Subscription,
   loadSubscriptions,
@@ -15,36 +16,43 @@ import {
   updateSubscription,
   deleteSubscription
 } from "@/lib/subscriptions";
+import { getExchangeRates, PRIMARY_CURRENCY_KEY } from "@/lib/currency";
 
 export default function Home() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [primaryCurrency, setPrimaryCurrency] = useState("USD");
-  const [editingSubscription, setEditingSubscription] = useState<Subscription | undefined>(undefined);
+  const [exchangeRates, setExchangeRates] = useState<Record<string, number>>({});
+  const [editingSubscription, setEditingSubscription] = useState<Subscription>();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  // Load subscriptions from local storage on initial render
   useEffect(() => {
     const loadedSubscriptions = loadSubscriptions();
     setSubscriptions(loadedSubscriptions);
 
-    // Determine primary currency based on most used currency in subscriptions
-    if (loadedSubscriptions.length > 0) {
-      const currencyCounts = loadedSubscriptions.reduce<Record<string, number>>(
-        (acc, sub) => {
-          acc[sub.currency] = (acc[sub.currency] || 0) + 1;
-          return acc;
-        },
-        {}
-      );
-
-      const mostUsedCurrency = Object.entries(currencyCounts).sort(
-        (a, b) => b[1] - a[1]
-      )[0]?.[0];
-
+    // Load saved primary currency preference or determine from subscriptions
+    const savedCurrency = localStorage.getItem(PRIMARY_CURRENCY_KEY);
+    if (savedCurrency) {
+      setPrimaryCurrency(savedCurrency);
+    } else if (loadedSubscriptions.length > 0) {
+      const currencyCounts = loadedSubscriptions.reduce((acc, sub) => {
+        acc[sub.currency] = (acc[sub.currency] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      const mostUsedCurrency = Object.entries(currencyCounts)
+        .sort((a, b) => b[1] - a[1])[0]?.[0];
       if (mostUsedCurrency) {
         setPrimaryCurrency(mostUsedCurrency);
+        localStorage.setItem(PRIMARY_CURRENCY_KEY, mostUsedCurrency);
       }
     }
+
+    // Load exchange rates
+    getExchangeRates().then(rates => {
+      setExchangeRates(rates);
+    }).catch(error => {
+      console.error('Failed to load exchange rates:', error);
+      toast.error('Failed to load currency exchange rates');
+    });
   }, []);
 
   // Handler for adding a new subscription
@@ -73,10 +81,14 @@ export default function Home() {
     const subscriptionToDelete = subscriptions.find(sub => sub.id === id);
     const updatedSubscriptions = deleteSubscription(id);
     setSubscriptions(updatedSubscriptions);
-
     if (subscriptionToDelete) {
       toast.success(`Deleted ${subscriptionToDelete.name} subscription`);
     }
+  };
+
+  const handleCurrencyChange = (currency: string) => {
+    setPrimaryCurrency(currency);
+    localStorage.setItem(PRIMARY_CURRENCY_KEY, currency);
   };
 
   return (
@@ -88,7 +100,11 @@ export default function Home() {
             Manage and track your recurring expenses
           </p>
         </div>
-        <div className="mt-4 sm:mt-0">
+        <div className="mt-4 sm:mt-0 flex items-center gap-4">
+          <CurrencySelect 
+            value={primaryCurrency} 
+            onValueChange={handleCurrencyChange}
+          />
           <SubscriptionFormDialog
             onSubmit={handleAddSubscription}
             buttonLabel="Add Subscription"
@@ -100,11 +116,17 @@ export default function Home() {
         <CostSummaryCards
           subscriptions={subscriptions}
           primaryCurrency={primaryCurrency}
+          exchangeRates={exchangeRates}
         />
-        <SubscriptionCharts
-          subscriptions={subscriptions}
-          primaryCurrency={primaryCurrency}
-        />
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <SubscriptionCharts
+            subscriptions={subscriptions}
+            primaryCurrency={primaryCurrency}
+            exchangeRates={exchangeRates}
+          />
+        </div>
+
         <Separator className="my-6" />
 
         <div>
@@ -120,6 +142,8 @@ export default function Home() {
             subscriptions={subscriptions}
             onUpdate={handleUpdateSubscription}
             onDelete={handleDeleteSubscription}
+            primaryCurrency={primaryCurrency}
+            exchangeRates={exchangeRates}
           />
         </div>
       </div>

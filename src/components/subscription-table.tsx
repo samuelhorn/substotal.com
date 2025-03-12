@@ -29,11 +29,14 @@ import {
 } from "@/components/ui/dialog";
 
 import { Subscription, calculateMonthlyCost, calculateYearlyCost } from "@/lib/subscriptions";
+import { convertAmount } from "@/lib/currency";
 
 interface SubscriptionTableProps {
     subscriptions: Subscription[];
     onUpdate: (subscription: Subscription) => void;
     onDelete: (id: string) => void;
+    primaryCurrency: string;
+    exchangeRates: Record<string, number>;
 }
 
 type SortColumn = "name" | "amount" | "frequency" | "category" | "startDate";
@@ -43,7 +46,7 @@ function getFaviconUrl(url: string | undefined) {
     if (!url) return null;
     try {
         const urlObj = new URL(url);
-        return `https://www.google.com/s2/favicons?domain=${urlObj.hostname}/${urlObj.pathname}&sz=32&prefer_dark=1`;
+        return `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=32`;
     } catch {
         return null;
     }
@@ -52,7 +55,9 @@ function getFaviconUrl(url: string | undefined) {
 export function SubscriptionTable({
     subscriptions,
     onUpdate,
-    onDelete
+    onDelete,
+    primaryCurrency,
+    exchangeRates
 }: SubscriptionTableProps) {
     const [sortColumn, setSortColumn] = useState<SortColumn>("name");
     const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
@@ -111,6 +116,17 @@ export function SubscriptionTable({
         }).format(amount);
     };
 
+    const formatAmount = (amount: number, fromCurrency: string) => {
+        const originalAmount = formatCurrency(amount, fromCurrency);
+
+        if (fromCurrency === primaryCurrency) {
+            return originalAmount;
+        }
+
+        const convertedAmount = convertAmount(amount, fromCurrency, primaryCurrency, exchangeRates);
+        return `${originalAmount} (${formatCurrency(convertedAmount, primaryCurrency)})`;
+    };
+
     const getSortIcon = (column: SortColumn) => {
         if (sortColumn !== column) return null;
         return sortDirection === "asc" ? "↑" : "↓";
@@ -121,36 +137,31 @@ export function SubscriptionTable({
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="w-[30px]"></TableHead>
-                        <TableHead
-                            className="cursor-pointer"
-                            onClick={() => handleSort("name")}
-                        >
-                            Name {getSortIcon("name")}
+                        <TableHead></TableHead>
+                        <TableHead>
+                            <div onClick={() => handleSort("name")} className="cursor-pointer">
+                                Name {getSortIcon("name")}
+                            </div>
                         </TableHead>
-                        <TableHead
-                            className="cursor-pointer"
-                            onClick={() => handleSort("amount")}
-                        >
-                            Amount {getSortIcon("amount")}
+                        <TableHead>
+                            <div onClick={() => handleSort("amount")} className="cursor-pointer">
+                                Amount {getSortIcon("amount")}
+                            </div>
                         </TableHead>
-                        <TableHead
-                            className="cursor-pointer"
-                            onClick={() => handleSort("frequency")}
-                        >
-                            Frequency {getSortIcon("frequency")}
+                        <TableHead>
+                            <div onClick={() => handleSort("frequency")} className="cursor-pointer">
+                                Frequency {getSortIcon("frequency")}
+                            </div>
                         </TableHead>
-                        <TableHead
-                            className="cursor-pointer"
-                            onClick={() => handleSort("category")}
-                        >
-                            Category {getSortIcon("category")}
+                        <TableHead>
+                            <div onClick={() => handleSort("category")} className="cursor-pointer">
+                                Category {getSortIcon("category")}
+                            </div>
                         </TableHead>
-                        <TableHead
-                            className="cursor-pointer"
-                            onClick={() => handleSort("startDate")}
-                        >
-                            Start Date {getSortIcon("startDate")}
+                        <TableHead>
+                            <div onClick={() => handleSort("startDate")} className="cursor-pointer">
+                                Start Date {getSortIcon("startDate")}
+                            </div>
                         </TableHead>
                         <TableHead>Monthly Cost</TableHead>
                         <TableHead>Yearly Cost</TableHead>
@@ -160,22 +171,22 @@ export function SubscriptionTable({
                 <TableBody>
                     {sortedSubscriptions.length === 0 ? (
                         <TableRow>
-                            <TableCell colSpan={9} className="text-center text-muted-foreground py-6">
+                            <TableCell colSpan={9} className="text-center text-muted-foreground py-4">
                                 No subscriptions added yet
                             </TableCell>
                         </TableRow>
                     ) : (
                         sortedSubscriptions.map((subscription) => (
                             <TableRow key={subscription.id}>
-                                <TableCell className="w-[30px]">
+                                <TableCell className="w-[24px]">
                                     {subscription.url ? (
-                                        <div className="relative w-6 h-6">
+                                        <div className="relative w-5 h-5">
                                             <Image
                                                 src={getFaviconUrl(subscription.url) || '/globe.svg'}
                                                 alt={`${subscription.name} favicon`}
                                                 className="rounded-sm"
-                                                width={24}
-                                                height={24}
+                                                width={20}
+                                                height={20}
                                                 onError={(e) => {
                                                     const img = e.target as HTMLImageElement;
                                                     img.src = '/globe.svg';
@@ -183,10 +194,10 @@ export function SubscriptionTable({
                                             />
                                         </div>
                                     ) : (
-                                        <Globe className="w-5 h-5 text-muted-foreground" />
+                                        <Globe className="w-4 h-4 text-muted-foreground" />
                                     )}
                                 </TableCell>
-                                <TableCell className="font-medium">
+                                <TableCell>
                                     {subscription.url ? (
                                         <a
                                             href={subscription.url}
@@ -200,20 +211,18 @@ export function SubscriptionTable({
                                         subscription.name
                                     )}
                                 </TableCell>
-                                <TableCell>
-                                    {formatCurrency(subscription.amount, subscription.currency)}
-                                </TableCell>
+                                <TableCell>{formatAmount(subscription.amount, subscription.currency)}</TableCell>
                                 <TableCell className="capitalize">{subscription.frequency}</TableCell>
                                 <TableCell>{subscription.category}</TableCell>
                                 <TableCell>{format(new Date(subscription.startDate), "MMM d, yyyy")}</TableCell>
                                 <TableCell>
-                                    {formatCurrency(
+                                    {formatAmount(
                                         calculateMonthlyCost(subscription),
                                         subscription.currency
                                     )}
                                 </TableCell>
                                 <TableCell>
-                                    {formatCurrency(
+                                    {formatAmount(
                                         calculateYearlyCost(subscription),
                                         subscription.currency
                                     )}

@@ -24,15 +24,18 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { convertAmount } from "@/lib/currency";
 
 interface SubscriptionChartsProps {
     subscriptions: Subscription[];
-    primaryCurrency?: string;
+    primaryCurrency: string;
+    exchangeRates: Record<string, number>;
 }
 
 export function SubscriptionCharts({
     subscriptions,
-    primaryCurrency = "USD"
+    primaryCurrency = "USD",
+    exchangeRates
 }: SubscriptionChartsProps) {
     const [viewMode, setViewMode] = useState<'monthly' | 'yearly'>('monthly');
 
@@ -45,13 +48,20 @@ export function SubscriptionCharts({
         }).format(amount);
     };
 
+    // Function to convert an amount to primary currency
+    const convertToPrimary = (amount: number, fromCurrency: string) => {
+        if (fromCurrency === primaryCurrency) return amount;
+        return convertAmount(amount, fromCurrency, primaryCurrency, exchangeRates);
+    };
+
     // Prepare data for category breakdown chart
     const categoryData = Object.entries(getSubscriptionsByCategory(subscriptions))
         .map(([category, subs]) => ({
             category,
             value: subs.reduce((acc, sub) => {
                 const monthlyCost = calculateMonthlyCost(sub);
-                return acc + (viewMode === 'monthly' ? monthlyCost : monthlyCost * 12);
+                const convertedCost = convertToPrimary(monthlyCost, sub.currency);
+                return acc + (viewMode === 'monthly' ? convertedCost : convertedCost * 12);
             }, 0),
         }))
         .sort((a, b) => b.value - a.value);
@@ -85,10 +95,11 @@ export function SubscriptionCharts({
                 const paymentDate = new Date(nextPaymentDate);
                 paymentDate.setMonth(paymentDate.getMonth() + i);
 
-                const dayDiff = Math.floor((paymentDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                if (dayDiff >= 0 && dayDiff < 60) {
-                    nextTwoMonths[dayDiff].value += sub.amount;
-                    nextTwoMonths[dayDiff].subscriptions.push(sub);
+                const dayIndex = Math.floor((paymentDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                if (dayIndex < nextTwoMonths.length) {
+                    const convertedAmount = convertToPrimary(sub.amount, sub.currency);
+                    nextTwoMonths[dayIndex].value += convertedAmount;
+                    nextTwoMonths[dayIndex].subscriptions.push(sub);
                 }
             }
         }
@@ -101,30 +112,26 @@ export function SubscriptionCharts({
                 nextPaymentDate.setFullYear(nextPaymentDate.getFullYear() + 1);
             }
 
-            const dayDiff = Math.floor((nextPaymentDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-            if (dayDiff >= 0 && dayDiff < 60) {
-                nextTwoMonths[dayDiff].value += sub.amount;
-                nextTwoMonths[dayDiff].subscriptions.push(sub);
+            const dayIndex = Math.floor((nextPaymentDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+            if (dayIndex < nextTwoMonths.length) {
+                const convertedAmount = convertToPrimary(sub.amount, sub.currency);
+                nextTwoMonths[dayIndex].value += convertedAmount;
+                nextTwoMonths[dayIndex].subscriptions.push(sub);
             }
         }
     });
 
-    // Filter out days with no payments
-    const filteredTimelineData = nextTwoMonths.filter(day => day.value > 0);
-
-    // Custom tooltip for the timeline chart
     const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
             return (
-                <div className="bg-white p-3 border shadow-sm rounded-lg">
-                    <p className="font-semibold">{data.dateString}</p>
-                    <p className="text-sm">{formatCurrency(data.value)}</p>
+                <div className="bg-white p-4 rounded-lg shadow-lg border">
+                    <p className="font-semibold">{format(data.date, "MMMM d, yyyy")}</p>
+                    <p className="text-lg font-bold">{formatCurrency(data.value)}</p>
                     <div className="mt-2">
                         {data.subscriptions.map((sub: Subscription) => (
-                            <div key={sub.id} className="text-xs">
-                                <span className="font-medium">{sub.name}</span>:{" "}
-                                {formatCurrency(sub.amount)}
+                            <div key={sub.id} className="text-sm">
+                                {sub.name} - {formatCurrency(convertToPrimary(sub.amount, sub.currency))}
                             </div>
                         ))}
                     </div>
@@ -135,58 +142,46 @@ export function SubscriptionCharts({
     };
 
     return (
-        <div className="grid gap-4 md:grid-cols-2">
+        <>
             <Card>
-                <CardHeader className="flex flex-row justify-between pb-2">
-                    <div className="flex flex-col gap-1.5">
+                <CardHeader>
+                    <div className="flex items-center justify-between">
                         <CardTitle>Category Breakdown</CardTitle>
-                        <CardDescription>
-                            {viewMode === 'monthly' ? 'Monthly' : 'Yearly'} cost by category
-                        </CardDescription>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <Label
-                            htmlFor={viewMode === 'yearly' ? "view-mode" : undefined}
-                            className={cn("text-sm", {
-                                "text-muted-foreground": viewMode === 'yearly'
-                            })}
-                        >
-                            Monthly
-                        </Label>
-                        <Switch
-                            id="view-mode"
-                            checked={viewMode === 'yearly'}
-                            onCheckedChange={(checked) => setViewMode(checked ? 'yearly' : 'monthly')}
-                        />
-                        <Label
-                            htmlFor={viewMode === 'monthly' ? "view-mode" : undefined}
-                            className={cn("text-sm", {
-                                "text-muted-foreground": viewMode === 'monthly'
-                            })}
-                        >
-                            Yearly
-                        </Label>
+                        <div className="flex items-center space-x-2">
+                            <Label htmlFor="view-mode">Yearly View</Label>
+                            <Switch
+                                id="view-mode"
+                                checked={viewMode === 'yearly'}
+                                onCheckedChange={(checked) =>
+                                    setViewMode(checked ? 'yearly' : 'monthly')
+                                }
+                            />
+                        </div>
                     </div>
                 </CardHeader>
-                <CardContent className="pt-2">
+                <CardContent>
                     <div className="h-[300px]">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart
-                                data={categoryData}
-                                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                            >
+                            <BarChart data={categoryData}>
                                 <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="category" />
+                                <XAxis
+                                    dataKey="category"
+                                    label={{ value: 'Categories', position: 'insideBottom', offset: -5 }}
+                                />
                                 <YAxis
-                                    tickFormatter={(value) => formatCurrency(value)}
+                                    label={{
+                                        value: `Cost (${primaryCurrency})`,
+                                        angle: -90,
+                                        position: 'insideLeft',
+                                    }}
                                 />
                                 <Tooltip
                                     formatter={(value: number) => [
                                         formatCurrency(value),
-                                        viewMode === 'monthly' ? "Monthly Cost" : "Yearly Cost"
+                                        `${viewMode === 'monthly' ? 'Monthly' : 'Yearly'} Cost`,
                                     ]}
                                 />
-                                <Bar dataKey="value" fill="#F7EBAF" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="value" fill="#3b82f6" />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -196,37 +191,38 @@ export function SubscriptionCharts({
             <Card>
                 <CardHeader>
                     <CardTitle>Upcoming Payments</CardTitle>
-                    <CardDescription>Next 60 days payment timeline</CardDescription>
+                    <CardDescription>
+                        Your subscription payments for the next 60 days
+                    </CardDescription>
                 </CardHeader>
-                <CardContent className="pt-2">
+                <CardContent>
                     <div className="h-[300px]">
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart
-                                data={filteredTimelineData}
-                                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                            >
-                                <CartesianGrid strokeDasharray="3 3" stroke="#6f665c" />
+                            <LineChart data={nextTwoMonths}>
+                                <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis
                                     dataKey="dateString"
-                                    padding={{ left: 10, right: 10 }}
+                                    label={{ value: 'Date', position: 'insideBottom', offset: -5 }}
                                 />
                                 <YAxis
-                                    tickFormatter={(value) => formatCurrency(value)}
+                                    label={{
+                                        value: `Amount (${primaryCurrency})`,
+                                        angle: -90,
+                                        position: 'insideLeft',
+                                    }}
                                 />
                                 <Tooltip content={<CustomTooltip />} />
                                 <Line
-                                    type="monotone"
+                                    type="stepAfter"
                                     dataKey="value"
-                                    stroke="#F7EBAF"
-                                    strokeWidth={2}
-                                    dot={{ r: 4 }}
-                                    activeDot={{ r: 6 }}
+                                    stroke="#3b82f6"
+                                    dot={false}
                                 />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
                 </CardContent>
             </Card>
-        </div>
+        </>
     );
 }

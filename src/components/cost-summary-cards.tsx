@@ -16,12 +16,14 @@ import {
 
 interface CostSummaryCardsProps {
     subscriptions: Subscription[];
-    primaryCurrency?: string;
+    primaryCurrency: string;
+    exchangeRates: Record<string, number>;
 }
 
 export function CostSummaryCards({
     subscriptions,
-    primaryCurrency = "USD"
+    primaryCurrency = "USD",
+    exchangeRates
 }: CostSummaryCardsProps) {
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat("en-US", {
@@ -31,9 +33,9 @@ export function CostSummaryCards({
         }).format(amount);
     };
 
-    const monthlyCost = calculateTotalMonthlyCost(subscriptions);
-    const yearlyCost = calculateTotalYearlyCost(subscriptions);
-    const lockedInCost = calculateLockedInCost(subscriptions);
+    const monthlyCost = calculateTotalMonthlyCost(subscriptions, primaryCurrency, exchangeRates);
+    const yearlyCost = calculateTotalYearlyCost(subscriptions, primaryCurrency, exchangeRates);
+    const lockedInCost = calculateLockedInCost(subscriptions, primaryCurrency, exchangeRates);
 
     return (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
