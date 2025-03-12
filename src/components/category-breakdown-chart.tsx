@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     BarChart,
     Bar,
@@ -11,7 +11,6 @@ import {
     Cell,
     TooltipProps,
     CartesianGrid,
-    Legend
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -25,10 +24,10 @@ import { convertAmount } from "@/lib/currency";
 import { formatCurrency } from "@/lib/utils";
 import {
     ChartTooltipWrapper,
-    formatTooltipCurrency,
     chartColors,
     getChartColor
 } from "@/components/ui/chart-components";
+import { loadChartViewMode, saveChartViewMode, type ChartViewMode } from '@/lib/settings';
 
 interface CategoryBreakdownChartProps {
     subscriptions: Subscription[];
@@ -41,7 +40,18 @@ export function CategoryBreakdownChart({
     primaryCurrency,
     exchangeRates
 }: CategoryBreakdownChartProps) {
-    const [viewMode, setViewMode] = useState<'monthly' | 'yearly'>('monthly');
+    const [viewMode, setViewMode] = useState<ChartViewMode>(() => loadChartViewMode());
+    const [isClient, setIsClient] = useState(false);
+
+    // Set isClient to true when component mounts
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    // Save viewMode to localStorage whenever it changes
+    useEffect(() => {
+        saveChartViewMode(viewMode);
+    }, [viewMode]);
 
     // Function to convert an amount to primary currency
     const convertToPrimary = (amount: number, fromCurrency: string) => {
@@ -90,18 +100,24 @@ export function CategoryBreakdownChart({
                     <div className="flex flex-col gap-1.5">
                         <CardTitle>Category Breakdown</CardTitle>
                         <CardDescription>
-                            Your {viewMode === 'yearly' ? 'yearly' : 'monthly'} expenses by category
+                            {isClient && (
+                                <>
+                                    Your {viewMode === 'yearly' ? 'yearly' : 'monthly'} expenses by category
+                                </>
+                            )}
                         </CardDescription>
                     </div>
                     <div className="flex items-center space-x-2">
                         <Label htmlFor="view-mode">Yearly View</Label>
-                        <Switch
-                            id="view-mode"
-                            checked={viewMode === 'yearly'}
-                            onCheckedChange={(checked) =>
-                                setViewMode(checked ? 'yearly' : 'monthly')
-                            }
-                        />
+                        {isClient && (
+                            <Switch
+                                id="view-mode"
+                                checked={viewMode === 'yearly'}
+                                onCheckedChange={(checked) =>
+                                    setViewMode(checked ? 'yearly' : 'monthly')
+                                }
+                            />
+                        )}
                     </div>
                 </div>
             </CardHeader>

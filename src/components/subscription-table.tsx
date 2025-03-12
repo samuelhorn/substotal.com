@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { MoreHorizontal, Pencil, Trash2, Globe, EyeOff, Eye } from "lucide-react";
 import Image from "next/image";
@@ -27,11 +27,11 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
 
 import { Subscription, calculateMonthlyCost, calculateYearlyCost } from "@/lib/subscriptions";
 import { convertAmount } from "@/lib/currency";
 import { formatCurrency } from "@/lib/utils";
+import { loadTableSortSettings, saveTableSortSettings } from '@/lib/settings';
 
 interface SubscriptionTableProps {
     subscriptions: Subscription[];
@@ -63,8 +63,28 @@ export function SubscriptionTable({
     primaryCurrency,
     exchangeRates
 }: SubscriptionTableProps) {
-    const [sortColumn, setSortColumn] = useState<SortColumn>("name");
-    const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+    // Initialize sort state from localStorage
+    const [sortColumn, setSortColumn] = useState<SortColumn>(() => {
+        const savedSettings = loadTableSortSettings();
+        return (savedSettings?.column as SortColumn) || "name";
+    });
+    const [sortDirection, setSortDirection] = useState<SortDirection>(() => {
+        const savedSettings = loadTableSortSettings();
+        return (savedSettings?.direction as SortDirection) || "asc";
+    });
+
+    const [isClient, setIsClient] = useState(false);
+
+    // Set isClient to true when component mounts
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    // Save sort settings whenever they change
+    useEffect(() => {
+        saveTableSortSettings({ column: sortColumn, direction: sortDirection });
+    }, [sortColumn, sortDirection]);
+
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [subscriptionToDelete, setSubscriptionToDelete] = useState<Subscription | null>(null);
 
@@ -133,7 +153,7 @@ export function SubscriptionTable({
     };
 
     const getSortIcon = (column: SortColumn) => {
-        if (sortColumn !== column) return null;
+        if (sortColumn !== column || !isClient) return null;
         return sortDirection === "asc" ? "↑" : "↓";
     };
 
