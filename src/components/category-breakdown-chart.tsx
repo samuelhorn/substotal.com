@@ -22,11 +22,8 @@ import {
 } from "@/lib/subscriptions";
 import { convertAmount } from "@/lib/currency";
 import { formatCurrency } from "@/lib/utils";
-import {
-    ChartTooltipWrapper,
-    chartColors,
-    getChartColor
-} from "@/components/ui/chart-components";
+import { ChartTooltipWrapper } from "@/components/ui/chart-components";
+import { cn } from "@/lib/utils";
 import { loadChartViewMode, saveChartViewMode, type ChartViewMode } from '@/lib/settings';
 
 interface CategoryBreakdownChartProps {
@@ -96,7 +93,7 @@ export function CategoryBreakdownChart({
     return (
         <Card>
             <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex items-start justify-between">
                     <div className="flex flex-col gap-1.5">
                         <CardTitle>Category Breakdown</CardTitle>
                         <CardDescription>
@@ -153,11 +150,18 @@ export function CategoryBreakdownChart({
                             <Tooltip content={<CustomTooltip />} cursor={{
                                 fill: 'rgba(255, 255, 255, 0.05)',
                             }} />
-                            <Bar dataKey="value" fill={chartColors[0]}>
+                            <Bar dataKey="value">
                                 {categoryData.map((entry, index) => (
                                     <Cell
+                                        className={cn({
+                                            "text-chart-1": index % 5 === 0,
+                                            "text-chart-2": index % 5 === 1,
+                                            "text-chart-3": index % 5 === 2,
+                                            "text-chart-4": index % 5 === 3,
+                                            "text-chart-5": index % 5 === 4,
+                                        })}
                                         key={`cell-${index}`}
-                                        fill={getChartColor(index)}
+                                        fill="currentColor"
                                     />
                                 ))}
                             </Bar>

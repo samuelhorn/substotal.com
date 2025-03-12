@@ -1,6 +1,6 @@
 "use client"
 
-import { CURRENCIES } from '@/lib/currencies'
+import { CURRENCIES, CURRENCY_COUNTRY_CODES } from '@/lib/currencies'
 import {
     Select,
     SelectContent,
@@ -8,6 +8,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import ReactCountryFlag from "react-country-flag"
 
 interface CurrencySelectProps {
     value: string
@@ -19,7 +20,14 @@ export function CurrencySelect({ value, onValueChange }: CurrencySelectProps) {
         <div className="flex items-center gap-2">
             <Select value={value} onValueChange={onValueChange}>
                 <SelectTrigger>
-                    <span className="mr-1 text-muted-foreground">Display currency:</span>
+                    <ReactCountryFlag
+                        countryCode={CURRENCY_COUNTRY_CODES[value as keyof typeof CURRENCY_COUNTRY_CODES]}
+                        style={{
+                            fontSize: '1.25em',
+                            lineHeight: '1.25em',
+                        }}
+                        svg
+                    />
                     <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>

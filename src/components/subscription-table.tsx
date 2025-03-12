@@ -166,7 +166,6 @@ export function SubscriptionTable({
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead></TableHead>
                         <TableHead>
                             <div onClick={() => handleSort("name")} className="cursor-pointer">
                                 Name {getSortIcon("name")}
@@ -195,7 +194,7 @@ export function SubscriptionTable({
                         <TableHead>Monthly Cost</TableHead>
                         <TableHead>Yearly Cost</TableHead>
                         <TableHead className="text-center">Visibility</TableHead>
-                        <TableHead>Actions</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -211,7 +210,7 @@ export function SubscriptionTable({
                                 key={subscription.id}
                                 className={subscription.hidden ? "opacity-50" : ""}
                             >
-                                <TableCell className="w-[24px]">
+                                <TableCell className="flex items-center gap-4">
                                     {subscription.url ? (
                                         <div className="relative w-5 h-5">
                                             <Image
@@ -229,8 +228,6 @@ export function SubscriptionTable({
                                     ) : (
                                         <Globe className="w-4 h-4 text-muted-foreground" />
                                     )}
-                                </TableCell>
-                                <TableCell>
                                     {subscription.url ? (
                                         <a
                                             href={subscription.url}
@@ -275,7 +272,7 @@ export function SubscriptionTable({
                                         </Button>
                                     </div>
                                 </TableCell>
-                                <TableCell>
+                                <TableCell className="flex justify-end">
                                     <Popover>
                                         <PopoverTrigger asChild>
                                             <Button variant="ghost" size="icon">
@@ -294,7 +291,7 @@ export function SubscriptionTable({
                                                 </Button>
                                                 <Button
                                                     variant="ghost"
-                                                    className="justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                    className="justify-start text-destructive-foreground"
                                                     onClick={() => handleDeleteClick(subscription)}
                                                 >
                                                     <Trash2 className="mr-2 h-4 w-4" />

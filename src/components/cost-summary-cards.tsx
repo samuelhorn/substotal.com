@@ -1,7 +1,6 @@
 "use client";
 
 import {
-    CalendarClock,
     CalendarDays,
     CalendarRange,
     LockIcon
@@ -41,7 +40,7 @@ function AnimatedCounter({ value, formatter }: { value: number; formatter: (valu
         return unsubscribe;
     }, [springValue, displayValue]);
 
-    return <motion.div className="text-6xl font-bold">{formattedValue}</motion.div>;
+    return <motion.div className="text-6xl xl:text-7xl 2xl:text-8xl font-bold">{formattedValue}</motion.div>;
 }
 
 interface CostSummaryCardsProps {
@@ -106,7 +105,7 @@ export function CostSummaryCards({
                 <CardContent>
                     <AnimatedCounter value={lockedInCost} formatter={formatCurrencyForDisplay} />
                     <p className="text-sm mt-4 font-thin text-muted-foreground mt-1">
-                        Committed expenses you can't cancel yet
+                        Committed expenses you can&apos;t cancel yet
                     </p>
                 </CardContent>
             </Card>

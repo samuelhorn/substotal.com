@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { convertAmount } from "./currency";
+import { loadAppState, saveAppState } from "./storage";
 
 // Define the subscription schema
 export const subscriptionSchema = z.object({
@@ -18,34 +19,17 @@ export const subscriptionSchema = z.object({
 // Define the Subscription type
 export type Subscription = z.infer<typeof subscriptionSchema>;
 
-// Key for localStorage
-const STORAGE_KEY = "subscription_tracker_data";
-
-// Function to load subscriptions from localStorage
+// Function to load subscriptions from storage
 export function loadSubscriptions(): Subscription[] {
-    if (typeof window === "undefined") return [];
-
-    try {
-        const data = localStorage.getItem(STORAGE_KEY);
-        if (!data) return [];
-
-        const subscriptions = JSON.parse(data);
-        return Array.isArray(subscriptions) ? subscriptions : [];
-    } catch (error) {
-        console.error("Failed to load subscriptions from localStorage:", error);
-        return [];
-    }
+    const state = loadAppState();
+    return state.subscriptions;
 }
 
-// Function to save subscriptions to localStorage
-export function saveSubscriptions(subscriptions: Subscription[]): void {
-    if (typeof window === "undefined") return;
-
-    try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(subscriptions));
-    } catch (error) {
-        console.error("Failed to save subscriptions to localStorage:", error);
-    }
+// Function to save subscriptions to storage
+function saveSubscriptions(subscriptions: Subscription[]): void {
+    const state = loadAppState();
+    state.subscriptions = subscriptions;
+    saveAppState(state);
 }
 
 // Function to add a new subscription
@@ -187,7 +171,7 @@ export function getUpcomingPayments(subscriptions: Subscription[], days: number 
 
     filterHiddenSubscriptions(subscriptions).forEach(sub => {
         const startDate = new Date(sub.startDate);
-        let nextPayment = new Date(startDate);
+        const nextPayment = new Date(startDate);
 
         // Find the next payment date after today
         while (nextPayment < today) {

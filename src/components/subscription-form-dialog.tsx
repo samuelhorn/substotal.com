@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import { CalendarIcon } from "lucide-react";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
     Dialog,
@@ -42,6 +42,7 @@ import {
 
 import { Subscription, subscriptionSchema } from "@/lib/subscriptions";
 import { loadPrimaryCurrency } from "@/lib/settings";
+import { CURRENCIES } from '@/lib/currencies'
 
 const CATEGORIES = [
     "Entertainment",
@@ -52,17 +53,6 @@ const CATEGORIES = [
     "Education",
     "Gaming",
     "Other",
-];
-
-const CURRENCIES = [
-    "USD",
-    "EUR",
-    "GBP",
-    "CAD",
-    "AUD",
-    "JPY",
-    "CNY",
-    "SEK"
 ];
 
 interface SubscriptionFormDialogProps {

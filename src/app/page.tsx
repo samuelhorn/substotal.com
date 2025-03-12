@@ -9,6 +9,8 @@ import { CostSummaryCards } from "@/components/cost-summary-cards";
 import { SubscriptionCharts } from "@/components/subscription-charts";
 import { Separator } from "@/components/ui/separator";
 import { CurrencySelect } from "@/components/currency-select";
+import { ImportExportDialog } from "@/components/import-export";
+import { NotificationSettingsDialog } from "@/components/notification-settings-dialog";
 import {
   Subscription,
   loadSubscriptions,
@@ -18,6 +20,7 @@ import {
 } from "@/lib/subscriptions";
 import { getExchangeRates } from "@/lib/currency";
 import { loadPrimaryCurrency, savePrimaryCurrency } from "@/lib/settings";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Home() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
@@ -102,23 +105,20 @@ export default function Home() {
   };
 
   return (
-    <main className="container mx-auto py-6 px-4 md:px-6">
-      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+    <main className="container mx-auto flex flex-col gap-8 py-8">
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Subscription Tracker</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage and track your recurring expenses
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight">
+            substotal
+          </h1>
         </div>
-        <div className="mt-4 sm:mt-0 flex items-center gap-4">
-          <CurrencySelect
-            value={primaryCurrency}
-            onValueChange={handleCurrencyChange}
-          />
-          <SubscriptionFormDialog
-            onSubmit={handleAddSubscription}
-            buttonLabel="Add Subscription"
-          />
+        <div className="mt-4 sm:mt-0">
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <NotificationSettingsDialog />
+            <ImportExportDialog />
+            <CurrencySelect value={primaryCurrency} onValueChange={handleCurrencyChange} />
+          </div>
         </div>
       </header>
 

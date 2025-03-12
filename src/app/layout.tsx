@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Gabarito } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { NotificationsInit } from "@/components/notifications-init";
+import { ThemeProvider } from "@/components/theme-provider"
 
 const gabarito = Gabarito({ subsets: ["latin"] });
 
@@ -22,10 +24,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={gabarito.className + " dark"}>
-        {children}
-        <Toaster />
+    <html lang="en" suppressHydrationWarning>
+      <body className={gabarito.className}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster />
+          <NotificationsInit />
+        </ThemeProvider>
       </body>
     </html>
   );

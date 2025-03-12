@@ -17,11 +17,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Subscription } from "@/lib/subscriptions";
 import { convertAmount } from "@/lib/currency";
 import { formatCurrency } from "@/lib/utils";
-import {
-    ChartTooltipWrapper,
-    chartColors,
-    getChartColor
-} from "@/components/ui/chart-components";
+import { ChartTooltipWrapper } from "@/components/ui/chart-components";
+import { cn } from "@/lib/utils";
 
 interface UpcomingPaymentsChartProps {
     subscriptions: Subscription[];
@@ -42,7 +39,7 @@ export function UpcomingPaymentsChart({
 
     // Create data for upcoming payments timeline
     const today = new Date();
-    const nextTwoMonths = Array.from({ length: 60 }, (_, i) => {
+    const nextTwoMonths = Array.from({ length: 30 }, (_, i) => {
         const date = addDays(today, i);
         return {
             date,
@@ -52,8 +49,8 @@ export function UpcomingPaymentsChart({
         };
     });
 
-    // Calculate upcoming payments for timeline
-    subscriptions.forEach(sub => {
+    // Filter out hidden subscriptions and calculate upcoming payments for timeline
+    subscriptions.filter(sub => !sub.hidden).forEach(sub => {
         const startDate = new Date(sub.startDate);
 
         // For monthly subscriptions
@@ -129,7 +126,7 @@ export function UpcomingPaymentsChart({
             <CardHeader>
                 <CardTitle>Upcoming Payments</CardTitle>
                 <CardDescription>
-                    Your subscription payments for the next 60 days
+                    Your subscription payments for the next 30 days
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -169,13 +166,19 @@ export function UpcomingPaymentsChart({
                             <Scatter
                                 name="Payments"
                                 data={paymentsData}
-                                fill={chartColors[0]}
                             >
                                 {
                                     paymentsData.map((entry, index) => (
                                         <Cell
+                                            className={cn({
+                                                "text-chart-1": index % 5 === 0,
+                                                "text-chart-2": index % 5 === 1,
+                                                "text-chart-3": index % 5 === 2,
+                                                "text-chart-4": index % 5 === 3,
+                                                "text-chart-5": index % 5 === 4,
+                                            })}
                                             key={`cell-${index}`}
-                                            fill={getChartColor(index)}
+                                            fill="currentColor"
                                         />
                                     ))
                                 }
