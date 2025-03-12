@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/popover";
 
 import { Subscription, subscriptionSchema } from "@/lib/subscriptions";
+import { loadPrimaryCurrency } from "@/lib/settings";
 
 const CATEGORIES = [
     "Entertainment",
@@ -108,7 +109,7 @@ export function SubscriptionFormDialog({
             startDate: subscription?.startDate || format(new Date(), "yyyy-MM-dd"),
             commitmentEndDate: subscription?.commitmentEndDate,
             category: subscription?.category || "Other",
-            currency: subscription?.currency || "USD",
+            currency: subscription?.currency || loadPrimaryCurrency() || "USD",
             url: subscription?.url || "",
         },
     });

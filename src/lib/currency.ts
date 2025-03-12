@@ -1,7 +1,8 @@
+import { PRIMARY_CURRENCY_KEY } from './settings'
+
 // Cache exchange rates for 24 hours
 const CACHE_KEY = 'exchange_rates_cache';
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
-export const PRIMARY_CURRENCY_KEY = 'primary_currency_preference';
 
 interface ExchangeRates {
     rates: Record<string, number>;

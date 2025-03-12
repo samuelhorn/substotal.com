@@ -16,8 +16,8 @@ import {
   updateSubscription,
   deleteSubscription
 } from "@/lib/subscriptions";
-import { getExchangeRates, PRIMARY_CURRENCY_KEY } from "@/lib/currency";
-import { Label } from "@/components/ui/label";
+import { getExchangeRates } from "@/lib/currency";
+import { loadPrimaryCurrency, savePrimaryCurrency } from "@/lib/settings";
 
 export default function Home() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
@@ -31,7 +31,7 @@ export default function Home() {
     setSubscriptions(loadedSubscriptions);
 
     // Load saved primary currency preference or determine from subscriptions
-    const savedCurrency = localStorage.getItem(PRIMARY_CURRENCY_KEY);
+    const savedCurrency = loadPrimaryCurrency();
     if (savedCurrency) {
       setPrimaryCurrency(savedCurrency);
     } else if (loadedSubscriptions.length > 0) {
@@ -43,7 +43,7 @@ export default function Home() {
         .sort((a, b) => b[1] - a[1])[0]?.[0];
       if (mostUsedCurrency) {
         setPrimaryCurrency(mostUsedCurrency);
-        localStorage.setItem(PRIMARY_CURRENCY_KEY, mostUsedCurrency);
+        savePrimaryCurrency(mostUsedCurrency);
       }
     }
 
@@ -89,7 +89,7 @@ export default function Home() {
 
   const handleCurrencyChange = (currency: string) => {
     setPrimaryCurrency(currency);
-    localStorage.setItem(PRIMARY_CURRENCY_KEY, currency);
+    savePrimaryCurrency(currency);
   };
 
   const handleToggleHidden = (subscription: Subscription) => {

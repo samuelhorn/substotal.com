@@ -1,6 +1,7 @@
 // Keys for localStorage
 export const CHART_VIEW_MODE_KEY = 'chart_view_mode';
 export const TABLE_SORT_KEY = 'table_sort_settings';
+export const PRIMARY_CURRENCY_KEY = 'primary_currency_preference';
 
 export type ChartViewMode = 'monthly' | 'yearly';
 export type TableSortSettings = {
@@ -28,4 +29,14 @@ export function loadTableSortSettings(): TableSortSettings | null {
 export function saveTableSortSettings(settings: TableSortSettings) {
     if (typeof window === 'undefined') return;
     localStorage.setItem(TABLE_SORT_KEY, JSON.stringify(settings));
+}
+
+export function loadPrimaryCurrency(): string {
+    if (typeof window === 'undefined') return 'USD';
+    return localStorage.getItem(PRIMARY_CURRENCY_KEY) || 'USD';
+}
+
+export function savePrimaryCurrency(currency: string) {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(PRIMARY_CURRENCY_KEY, currency);
 }
