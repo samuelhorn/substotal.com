@@ -6,11 +6,12 @@ import {
     Bar,
     XAxis,
     YAxis,
-    CartesianGrid,
     Tooltip,
     ResponsiveContainer,
     Cell,
-    TooltipProps
+    TooltipProps,
+    CartesianGrid,
+    Legend
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -22,6 +23,12 @@ import {
 } from "@/lib/subscriptions";
 import { convertAmount } from "@/lib/currency";
 import { formatCurrency } from "@/lib/utils";
+import {
+    ChartTooltipWrapper,
+    formatTooltipCurrency,
+    chartColors,
+    getChartColor
+} from "@/components/ui/chart-components";
 
 interface CategoryBreakdownChartProps {
     subscriptions: Subscription[];
@@ -54,6 +61,28 @@ export function CategoryBreakdownChart({
         }))
         .sort((a, b) => b.value - a.value);
 
+    // Custom tooltip component
+    const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+        if (active && payload && payload.length) {
+            const { value, category } = payload[0].payload;
+            return (
+                <ChartTooltipWrapper>
+                    <p className="font-semibold">{category}</p>
+                    <p className="text-lg font-bold">
+                        {formatCurrency(value, primaryCurrency, {
+                            showDecimals: true,
+                            currencyDisplay: "narrowSymbol"
+                        })}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                        {viewMode === 'monthly' ? 'Monthly' : 'Yearly'} Cost
+                    </p>
+                </ChartTooltipWrapper>
+            );
+        }
+        return null;
+    };
+
     return (
         <Card>
             <CardHeader>
@@ -79,47 +108,42 @@ export function CategoryBreakdownChart({
             <CardContent>
                 <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={categoryData}>
-                            <CartesianGrid strokeDasharray="3 3" />
+                        <BarChart data={categoryData} margin={{ left: 20, right: 20, top: 20, bottom: 20 }}>
+                            <CartesianGrid
+                                strokeDasharray="2 2"
+                                stroke="#6f665c"
+                                strokeOpacity={0.5}
+                            />
                             <XAxis
                                 dataKey="category"
-                                label={{ value: 'Categories', position: 'insideBottom', offset: -5 }}
+                                stroke="#6f665c"
+                                label={{
+                                    value: 'Categories',
+                                    position: 'insideBottom',
+                                    offset: -20,
+                                    style: { fill: "#6f665c" }
+                                }}
                             />
                             <YAxis
+                                stroke="#6f665c"
                                 label={{
                                     value: `Cost (${primaryCurrency})`,
                                     angle: -90,
                                     position: 'insideLeft',
+                                    style: { fill: "#6f665c" },
+                                    offset: 0
                                 }}
                             />
-                            <Tooltip
-                                formatter={(value: number) => [
-                                    formatCurrency(value, primaryCurrency, {
-                                        showDecimals: true,
-                                        currencyDisplay: "narrowSymbol"
-                                    }),
-                                    `${viewMode === 'monthly' ? 'Monthly' : 'Yearly'} Cost`,
-                                ]}
-                            />
-                            <Bar
-                                dataKey="value"
-                                fill="#8B4513"  // Saddle Brown
-                            >
-                                {
-                                    categoryData.map((entry, index) => (
-                                        <Cell
-                                            key={`cell-${index}`}
-                                            fill={[
-                                                '#8B4513',  // Saddle Brown
-                                                '#A0522D',  // Sienna
-                                                '#6B4423',  // Dark Brown
-                                                '#8B7355',  // Taupe
-                                                '#CD853F',  // Peru
-                                                '#DEB887',  // Burlywood
-                                            ][index % 6]}
-                                        />
-                                    ))
-                                }
+                            <Tooltip content={<CustomTooltip />} cursor={{
+                                fill: 'rgba(255, 255, 255, 0.05)',
+                            }} />
+                            <Bar dataKey="value" fill={chartColors[0]}>
+                                {categoryData.map((entry, index) => (
+                                    <Cell
+                                        key={`cell-${index}`}
+                                        fill={getChartColor(index)}
+                                    />
+                                ))}
                             </Bar>
                         </BarChart>
                     </ResponsiveContainer>

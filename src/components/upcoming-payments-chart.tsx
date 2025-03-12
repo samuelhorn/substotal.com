@@ -6,17 +6,22 @@ import {
     Scatter,
     XAxis,
     YAxis,
-    CartesianGrid,
     Tooltip,
     ResponsiveContainer,
     TooltipProps,
     ZAxis,
-    Cell
+    Cell,
+    CartesianGrid
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Subscription } from "@/lib/subscriptions";
 import { convertAmount } from "@/lib/currency";
 import { formatCurrency } from "@/lib/utils";
+import {
+    ChartTooltipWrapper,
+    chartColors,
+    getChartColor
+} from "@/components/ui/chart-components";
 
 interface UpcomingPaymentsChartProps {
     subscriptions: Subscription[];
@@ -93,21 +98,11 @@ export function UpcomingPaymentsChart({
     // Filter out days with no payments to only show actual payment days
     const paymentsData = nextTwoMonths.filter(day => day.value > 0);
 
-    // The earthy colors palette from your category breakdown chart
-    const earthyColors = [
-        '#8B4513',  // Saddle Brown
-        '#A0522D',  // Sienna
-        '#6B4423',  // Dark Brown
-        '#8B7355',  // Taupe
-        '#CD853F',  // Peru
-        '#DEB887',  // Burlywood
-    ];
-
-    const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+    const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
             return (
-                <div className="bg-white p-4 rounded-lg shadow-lg border">
+                <ChartTooltipWrapper>
                     <p className="font-semibold">{format(data.date, "MMMM d, yyyy")}</p>
                     <p className="text-lg font-bold">{formatCurrency(data.value, primaryCurrency, {
                         showDecimals: true,
@@ -123,7 +118,7 @@ export function UpcomingPaymentsChart({
                             </div>
                         ))}
                     </div>
-                </div>
+                </ChartTooltipWrapper>
             );
         }
         return null;
@@ -143,34 +138,44 @@ export function UpcomingPaymentsChart({
                         <ScatterChart
                             margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
                         >
-                            <CartesianGrid strokeDasharray="3 3" />
+                            <CartesianGrid
+                                strokeDasharray="2 2"
+                                stroke="#6f665c"
+                                strokeOpacity={0.5}
+                            />
                             <XAxis
                                 dataKey="dateString"
                                 name="Date"
+                                stroke="#6f665c"
                                 tick={{ fontSize: 12 }}
-                                label={{ value: 'Date', position: 'insideBottom', offset: -5 }}
+                                label={{ value: 'Date', position: 'insideBottom', offset: -20, style: { fill: "#6f665c" } }}
                             />
                             <YAxis
                                 dataKey="value"
                                 name="Amount"
+                                stroke="#6f665c"
                                 label={{
                                     value: `Amount (${primaryCurrency})`,
                                     angle: -90,
+                                    offset: 0,
                                     position: 'insideLeft',
+                                    style: { fill: "#6f665c" }
                                 }}
                             />
                             <ZAxis range={[100, 400]} />
-                            <Tooltip content={<CustomTooltip />} />
+                            <Tooltip content={<CustomTooltip />} cursor={{
+                                stroke: 'rgba(255, 255, 255, 0.15)',
+                            }} />
                             <Scatter
                                 name="Payments"
                                 data={paymentsData}
-                                fill={earthyColors[0]}
+                                fill={chartColors[0]}
                             >
                                 {
                                     paymentsData.map((entry, index) => (
                                         <Cell
                                             key={`cell-${index}`}
-                                            fill={earthyColors[index % earthyColors.length]}
+                                            fill={getChartColor(index)}
                                         />
                                     ))
                                 }
