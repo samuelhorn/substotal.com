@@ -12,6 +12,7 @@ export const subscriptionSchema = z.object({
     category: z.string(),
     currency: z.string().default("USD"),
     url: z.string().url("Invalid URL").optional(),
+    hidden: z.boolean().default(false),
 });
 
 // Define the Subscription type
@@ -103,9 +104,14 @@ export function calculateYearlyCost(subscription: Subscription, targetCurrency?:
     return baseAmount;
 }
 
+// Helper function to filter out hidden subscriptions
+function filterHiddenSubscriptions(subscriptions: Subscription[]): Subscription[] {
+    return subscriptions.filter(sub => !sub.hidden);
+}
+
 // Calculate total monthly cost in target currency
 export function calculateTotalMonthlyCost(subscriptions: Subscription[], targetCurrency?: string, rates?: Record<string, number>): number {
-    return subscriptions.reduce(
+    return filterHiddenSubscriptions(subscriptions).reduce(
         (total, sub) => total + calculateMonthlyCost(sub, targetCurrency, rates),
         0
     );
@@ -113,7 +119,7 @@ export function calculateTotalMonthlyCost(subscriptions: Subscription[], targetC
 
 // Calculate total yearly cost in target currency
 export function calculateTotalYearlyCost(subscriptions: Subscription[], targetCurrency?: string, rates?: Record<string, number>): number {
-    return subscriptions.reduce(
+    return filterHiddenSubscriptions(subscriptions).reduce(
         (total, sub) => total + calculateYearlyCost(sub, targetCurrency, rates),
         0
     );
@@ -123,7 +129,7 @@ export function calculateTotalYearlyCost(subscriptions: Subscription[], targetCu
 export function calculateLockedInCost(subscriptions: Subscription[], targetCurrency?: string, rates?: Record<string, number>): number {
     const today = new Date();
 
-    return subscriptions
+    return filterHiddenSubscriptions(subscriptions)
         .filter(sub => {
             if (!sub.commitmentEndDate) return false;
             const endDate = new Date(sub.commitmentEndDate);
@@ -161,7 +167,7 @@ export function getCategories(subscriptions: Subscription[]): string[] {
 
 // Get subscriptions by category
 export function getSubscriptionsByCategory(subscriptions: Subscription[]): Record<string, Subscription[]> {
-    return subscriptions.reduce((acc, sub) => {
+    return filterHiddenSubscriptions(subscriptions).reduce((acc, sub) => {
         const category = sub.category || "Uncategorized";
         if (!acc[category]) {
             acc[category] = [];
@@ -172,32 +178,41 @@ export function getSubscriptionsByCategory(subscriptions: Subscription[]): Recor
 }
 
 // Get upcoming payments in the next 30 days
-export function getUpcomingPayments(subscriptions: Subscription[], days: number = 30): Subscription[] {
+export function getUpcomingPayments(subscriptions: Subscription[], days: number = 30): { date: Date; subscription: Subscription; amount: number }[] {
     const today = new Date();
-    const futureDate = new Date();
-    futureDate.setDate(today.getDate() + days);
+    const endDate = new Date(today);
+    endDate.setDate(endDate.getDate() + days);
 
-    return subscriptions.filter(sub => {
+    const payments: { date: Date; subscription: Subscription; amount: number }[] = [];
+
+    filterHiddenSubscriptions(subscriptions).forEach(sub => {
         const startDate = new Date(sub.startDate);
+        let nextPayment = new Date(startDate);
 
-        // For monthly subscriptions
-        if (sub.frequency === "monthly") {
-            const nextPaymentDate = new Date(startDate);
-            while (nextPaymentDate <= today) {
-                nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
+        // Find the next payment date after today
+        while (nextPayment < today) {
+            if (sub.frequency === "monthly") {
+                nextPayment.setMonth(nextPayment.getMonth() + 1);
+            } else {
+                nextPayment.setFullYear(nextPayment.getFullYear() + 1);
             }
-            return nextPaymentDate <= futureDate;
         }
 
-        // For yearly subscriptions
-        if (sub.frequency === "yearly") {
-            const nextPaymentDate = new Date(startDate);
-            while (nextPaymentDate <= today) {
-                nextPaymentDate.setFullYear(nextPaymentDate.getFullYear() + 1);
-            }
-            return nextPaymentDate <= futureDate;
-        }
+        // Add all payments within the time window
+        while (nextPayment <= endDate) {
+            payments.push({
+                date: new Date(nextPayment),
+                subscription: sub,
+                amount: sub.amount
+            });
 
-        return false;
+            if (sub.frequency === "monthly") {
+                nextPayment.setMonth(nextPayment.getMonth() + 1);
+            } else {
+                nextPayment.setFullYear(nextPayment.getFullYear() + 1);
+            }
+        }
     });
+
+    return payments.sort((a, b) => a.date.getTime() - b.date.getTime());
 }

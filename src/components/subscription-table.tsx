@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { MoreHorizontal, Pencil, Trash2, Globe } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Globe, EyeOff } from "lucide-react";
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
 
 import { Subscription, calculateMonthlyCost, calculateYearlyCost } from "@/lib/subscriptions";
 import { convertAmount } from "@/lib/currency";
@@ -35,6 +36,7 @@ interface SubscriptionTableProps {
     subscriptions: Subscription[];
     onUpdate: (subscription: Subscription) => void;
     onDelete: (id: string) => void;
+    onToggleHidden: (subscription: Subscription) => void;
     primaryCurrency: string;
     exchangeRates: Record<string, number>;
 }
@@ -56,6 +58,7 @@ export function SubscriptionTable({
     subscriptions,
     onUpdate,
     onDelete,
+    onToggleHidden,
     primaryCurrency,
     exchangeRates
 }: SubscriptionTableProps) {
@@ -132,6 +135,10 @@ export function SubscriptionTable({
         return sortDirection === "asc" ? "↑" : "↓";
     };
 
+    const handleToggleHidden = (subscription: Subscription) => {
+        onToggleHidden(subscription);
+    };
+
     return (
         <div>
             <Table>
@@ -165,19 +172,23 @@ export function SubscriptionTable({
                         </TableHead>
                         <TableHead>Monthly Cost</TableHead>
                         <TableHead>Yearly Cost</TableHead>
+                        <TableHead className="text-center">Hidden</TableHead>
                         <TableHead>Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {sortedSubscriptions.length === 0 ? (
                         <TableRow>
-                            <TableCell colSpan={9} className="text-center text-muted-foreground py-4">
+                            <TableCell colSpan={10} className="text-center text-muted-foreground py-4">
                                 No subscriptions added yet
                             </TableCell>
                         </TableRow>
                     ) : (
                         sortedSubscriptions.map((subscription) => (
-                            <TableRow key={subscription.id}>
+                            <TableRow 
+                                key={subscription.id}
+                                className={subscription.hidden ? "opacity-50" : ""}
+                            >
                                 <TableCell className="w-[24px]">
                                     {subscription.url ? (
                                         <div className="relative w-5 h-5">
@@ -226,6 +237,17 @@ export function SubscriptionTable({
                                         calculateYearlyCost(subscription),
                                         subscription.currency
                                     )}
+                                </TableCell>
+                                <TableCell className="text-center">
+                                    <div className="flex items-center justify-center gap-2">
+                                        <Switch
+                                            checked={subscription.hidden}
+                                            onCheckedChange={() => handleToggleHidden(subscription)}
+                                        />
+                                        {subscription.hidden && (
+                                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                        )}
+                                    </div>
                                 </TableCell>
                                 <TableCell>
                                     <Popover>

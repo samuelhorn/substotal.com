@@ -91,6 +91,15 @@ export default function Home() {
     localStorage.setItem(PRIMARY_CURRENCY_KEY, currency);
   };
 
+  const handleToggleHidden = (subscription: Subscription) => {
+    const updatedSubscription = {
+      ...subscription,
+      hidden: !subscription.hidden
+    };
+    const updatedSubscriptions = updateSubscription(updatedSubscription);
+    setSubscriptions(updatedSubscriptions);
+  };
+
   return (
     <main className="container mx-auto py-6 px-4 md:px-6">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
@@ -101,8 +110,8 @@ export default function Home() {
           </p>
         </div>
         <div className="mt-4 sm:mt-0 flex items-center gap-4">
-          <CurrencySelect 
-            value={primaryCurrency} 
+          <CurrencySelect
+            value={primaryCurrency}
             onValueChange={handleCurrencyChange}
           />
           <SubscriptionFormDialog
@@ -142,6 +151,7 @@ export default function Home() {
             subscriptions={subscriptions}
             onUpdate={handleUpdateSubscription}
             onDelete={handleDeleteSubscription}
+            onToggleHidden={handleToggleHidden}
             primaryCurrency={primaryCurrency}
             exchangeRates={exchangeRates}
           />
