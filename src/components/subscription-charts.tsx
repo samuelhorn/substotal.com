@@ -23,7 +23,6 @@ import {
 } from "@/lib/subscriptions";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 import { convertAmount } from "@/lib/currency";
 
 interface SubscriptionChartsProps {
@@ -213,10 +212,10 @@ export function SubscriptionCharts({
                                 />
                                 <Tooltip content={<CustomTooltip />} />
                                 <Line
-                                    type="stepAfter"
+                                    type="monotone"
                                     dataKey="value"
                                     stroke="#3b82f6"
-                                    dot={false}
+                                    dot={true}
                                 />
                             </LineChart>
                         </ResponsiveContainer>
