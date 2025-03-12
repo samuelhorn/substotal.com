@@ -2,18 +2,21 @@
 
 import { format, addDays } from "date-fns";
 import {
-    LineChart,
-    Line,
+    ScatterChart,
+    Scatter,
     XAxis,
     YAxis,
     CartesianGrid,
     Tooltip,
     ResponsiveContainer,
-    TooltipProps
+    TooltipProps,
+    ZAxis,
+    Cell
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Subscription } from "@/lib/subscriptions";
 import { convertAmount } from "@/lib/currency";
+import { formatCurrency } from "@/lib/utils";
 
 interface UpcomingPaymentsChartProps {
     subscriptions: Subscription[];
@@ -26,15 +29,6 @@ export function UpcomingPaymentsChart({
     primaryCurrency,
     exchangeRates
 }: UpcomingPaymentsChartProps) {
-    // Format currency for display
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: primaryCurrency,
-            minimumFractionDigits: 2,
-        }).format(amount);
-    };
-
     // Function to convert an amount to primary currency
     const convertToPrimary = (amount: number, fromCurrency: string) => {
         if (fromCurrency === primaryCurrency) return amount;
@@ -96,17 +90,36 @@ export function UpcomingPaymentsChart({
         }
     });
 
+    // Filter out days with no payments to only show actual payment days
+    const paymentsData = nextTwoMonths.filter(day => day.value > 0);
+
+    // The earthy colors palette from your category breakdown chart
+    const earthyColors = [
+        '#8B4513',  // Saddle Brown
+        '#A0522D',  // Sienna
+        '#6B4423',  // Dark Brown
+        '#8B7355',  // Taupe
+        '#CD853F',  // Peru
+        '#DEB887',  // Burlywood
+    ];
+
     const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
             return (
                 <div className="bg-white p-4 rounded-lg shadow-lg border">
                     <p className="font-semibold">{format(data.date, "MMMM d, yyyy")}</p>
-                    <p className="text-lg font-bold">{formatCurrency(data.value)}</p>
+                    <p className="text-lg font-bold">{formatCurrency(data.value, primaryCurrency, {
+                        showDecimals: true,
+                        currencyDisplay: "narrowSymbol"
+                    })}</p>
                     <div className="mt-2">
                         {data.subscriptions.map((sub: Subscription) => (
                             <div key={sub.id} className="text-sm">
-                                {sub.name} - {formatCurrency(convertToPrimary(sub.amount, sub.currency))}
+                                {sub.name} - {formatCurrency(convertToPrimary(sub.amount, sub.currency), primaryCurrency, {
+                                    showDecimals: true,
+                                    currencyDisplay: "narrowSymbol"
+                                })}
                             </div>
                         ))}
                     </div>
@@ -127,27 +140,42 @@ export function UpcomingPaymentsChart({
             <CardContent>
                 <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={nextTwoMonths}>
+                        <ScatterChart
+                            margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+                        >
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis
                                 dataKey="dateString"
+                                name="Date"
+                                tick={{ fontSize: 12 }}
                                 label={{ value: 'Date', position: 'insideBottom', offset: -5 }}
                             />
                             <YAxis
+                                dataKey="value"
+                                name="Amount"
                                 label={{
                                     value: `Amount (${primaryCurrency})`,
                                     angle: -90,
                                     position: 'insideLeft',
                                 }}
                             />
+                            <ZAxis range={[100, 400]} />
                             <Tooltip content={<CustomTooltip />} />
-                            <Line
-                                type="monotone"
-                                dataKey="value"
-                                stroke="none"
-                                dot={true}
-                            />
-                        </LineChart>
+                            <Scatter
+                                name="Payments"
+                                data={paymentsData}
+                                fill={earthyColors[0]}
+                            >
+                                {
+                                    paymentsData.map((entry, index) => (
+                                        <Cell
+                                            key={`cell-${index}`}
+                                            fill={earthyColors[index % earthyColors.length]}
+                                        />
+                                    ))
+                                }
+                            </Scatter>
+                        </ScatterChart>
                     </ResponsiveContainer>
                 </div>
             </CardContent>
