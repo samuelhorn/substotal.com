@@ -48,8 +48,6 @@ export default function RootLayout({
               </main>
               <Footer />
               <Toaster />
-
-              {/* Google Analytics with privacy consent */}
               <GoogleAnalyticsProvider measurementId={GA_MEASUREMENT_ID} />
               <ConsentBanner />
             </ErrorBoundary>
