@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { CurrencyProvider } from "@/components/currency-context";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 const gabarito = Gabarito({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
@@ -36,13 +37,15 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <CurrencyProvider>
-            <Header />
-            <main className="container mx-auto">
-              {children}
-            </main>
-            <Footer />
-            <Toaster />
-            <NotificationsInit />
+            <ErrorBoundary>
+              <Header />
+              <main className="container mx-auto">
+                {children}
+              </main>
+              <Footer />
+              <Toaster />
+              <NotificationsInit />
+            </ErrorBoundary>
           </CurrencyProvider>
         </ThemeProvider>
       </body>
