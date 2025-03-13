@@ -1,7 +1,7 @@
 'use client';
 
 import { GoogleAnalytics } from '@next/third-parties/google';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 // Default consent state - all set to 'denied' initially
 const DEFAULT_CONSENT_STATE = {
@@ -32,42 +32,34 @@ declare global {
 }
 
 export default function GoogleAnalyticsProvider({ measurementId }: Props) {
-    // We don't need to track consent status as state since we're not using it in the UI
-    // Removed isConsentGranted useState
+    // Track consent status to conditionally render GA
+    const [consentGranted, setConsentGranted] = useState(false);
 
     useEffect(() => {
-        // Check if user has previously given consent
-        const hasConsent = localStorage.getItem('analytics_consent') === 'granted';
-
-        // Initialize dataLayer and gtag function
+        // Initialize dataLayer and gtag function even before consent
+        // so we can set up the consent mode properly
         if (typeof window !== 'undefined') {
             // Initialize dataLayer if it doesn't exist
             window.dataLayer = window.dataLayer || [];
 
-            // Define gtag function safely
+            // Define gtag function safely - needed for consent management
             window.gtag = function (...args: any[]) {
-                // Make sure dataLayer exists before pushing to it
                 window.dataLayer?.push(args);
             };
 
-            const gtag = window.gtag;
+            // Check if user has previously given consent
+            const hasConsent = localStorage.getItem('analytics_consent') === 'granted';
+            setConsentGranted(hasConsent);
 
-            // Initialize Google's consent mode
-            gtag('consent', 'default', DEFAULT_CONSENT_STATE);
-
-            // Update consent state if previously granted
-            if (hasConsent) {
-                gtag('consent', 'update', {
-                    analytics_storage: 'granted',
-                });
-            }
-
-            // Handle consent banner interaction
+            // Set up consent handlers regardless of current consent state
             window.grantAnalyticsConsent = () => {
                 if (window.gtag) {
                     window.gtag('consent', 'update', {
                         analytics_storage: 'granted',
                     });
+
+                    // Mark as consented so the component renders GA
+                    setConsentGranted(true);
                 }
                 localStorage.setItem('analytics_consent', 'granted');
             };
@@ -79,9 +71,16 @@ export default function GoogleAnalyticsProvider({ measurementId }: Props) {
                     });
                 }
                 localStorage.setItem('analytics_consent', 'denied');
+                setConsentGranted(false);
             };
         }
     }, []);
+
+    // Only render the GoogleAnalytics component if consent has been granted
+    // This prevents the GA script from loading until consent is given
+    if (!consentGranted) {
+        return null;
+    }
 
     return <GoogleAnalytics gaId={measurementId} />;
 }
