@@ -65,15 +65,23 @@ export function requestNotificationPermission(): Promise<boolean> {
     if (!("Notification" in window)) {
         return Promise.resolve(false);
     }
-
-    if (Notification.permission === "granted") {
+    
+    // Only access Notification API properties if it exists
+    const permission = "Notification" in window ? Notification.permission : "denied";
+    
+    if (permission === "granted") {
         return Promise.resolve(true);
     }
-
-    if (Notification.permission === "denied") {
+    
+    if (permission === "denied") {
         return Promise.resolve(false);
     }
-
-    return Notification.requestPermission()
-        .then(permission => permission === "granted");
+    
+    // Make sure we only call requestPermission when the API exists
+    if ("Notification" in window) {
+        return Notification.requestPermission()
+            .then(permission => permission === "granted");
+    }
+    
+    return Promise.resolve(false);
 }

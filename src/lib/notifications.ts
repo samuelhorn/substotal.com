@@ -41,85 +41,113 @@ export async function requestAndVerifyPermission(): Promise<boolean> {
     if (!("Notification" in window)) {
         return false;
     }
-
-    if (Notification.permission === "granted") {
+    
+    // Safe access to Notification permission
+    const permission = Notification.permission;
+    
+    if (permission === "granted") {
         return true;
     }
-
-    if (Notification.permission === "denied") {
+    
+    if (permission === "denied") {
         return false;
     }
-
-    const permission = await Notification.requestPermission();
-    return permission === "granted";
+    
+    try {
+        const permission = await Notification.requestPermission();
+        return permission === "granted";
+    } catch (error) {
+        console.error('Error requesting notification permission:', error);
+        return false;
+    }
 }
 
 export function checkAndScheduleNotifications() {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined') {
+        return;
+    }
+    
     // Double check permissions each time
-    if (!("Notification" in window) || Notification.permission !== "granted") {
+    if (!("Notification" in window)) {
         return;
     }
-
-    const { enabled, reminderDays } = loadNotificationSettings();
-    if (!enabled) {
-        return;
-    }
-
-    const state = loadAppState();
-    const upcomingPayments = getUpcomingPayments(state.subscriptions, reminderDays);
-    const today = new Date();
-
-    upcomingPayments.forEach(payment => {
-        const daysUntilPayment = Math.floor(
-            (payment.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-        );
-
-        // Notify if payment is within the reminder period and hasn't been notified
-        if (daysUntilPayment <= reminderDays && !hasNotificationBeenSent(payment.subscription.id, payment.date)) {
-            const amount = new Intl.NumberFormat(undefined, {
-                style: 'currency',
-                currency: payment.subscription.currency
-            }).format(payment.amount);
-
-            let message: string;
-            if (daysUntilPayment === 0) {
-                message = `${payment.subscription.name} payment of ${amount} is due today`;
-            } else if (daysUntilPayment === 1) {
-                message = `${payment.subscription.name} payment of ${amount} is due tomorrow`;
-            } else {
-                message = `${payment.subscription.name} payment of ${amount} is due in ${daysUntilPayment} days`;
-            }
-
-            try {
-                new Notification("Upcoming Subscription Payment", {
-                    body: message,
-                    icon: payment.subscription.url ?
-                        `https://www.google.com/s2/favicons?domain=${new URL(payment.subscription.url).hostname}&sz=64` :
-                        undefined,
-                    requireInteraction: true // Make notification persist until user interacts with it
-                });
-
-                // Record that we've sent this notification
-                saveSentNotification({
-                    subscriptionId: payment.subscription.id,
-                    paymentDate: payment.date.toISOString(),
-                    sentAt: new Date().toISOString()
-                });
-            } catch (error) {
-                console.error('Failed to send notification:', error);
-            }
+    
+    // Safe access to Notification API
+    try {
+        if (Notification.permission !== "granted") {
+            return;
         }
-    });
+        
+        const { enabled, reminderDays } = loadNotificationSettings();
+        if (!enabled) {
+            return;
+        }
+        
+        const state = loadAppState();
+        const upcomingPayments = getUpcomingPayments(state.subscriptions, reminderDays);
+        const today = new Date();
+        
+        upcomingPayments.forEach(payment => {
+            const daysUntilPayment = Math.floor(
+                (payment.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+            );
+            
+            // Notify if payment is within the reminder period and hasn't been notified
+            if (daysUntilPayment <= reminderDays && !hasNotificationBeenSent(payment.subscription.id, payment.date)) {
+                const amount = new Intl.NumberFormat(undefined, {
+                    style: 'currency',
+                    currency: payment.subscription.currency
+                }).format(payment.amount);
+                
+                let message: string;
+                if (daysUntilPayment === 0) {
+                    message = `${payment.subscription.name} payment of ${amount} is due today`;
+                } else if (daysUntilPayment === 1) {
+                    message = `${payment.subscription.name} payment of ${amount} is due tomorrow`;
+                } else {
+                    message = `${payment.subscription.name} payment of ${amount} is due in ${daysUntilPayment} days`;
+                }
+                
+                try {
+                    if ("Notification" in window) {
+                        new Notification("Upcoming Subscription Payment", {
+                            body: message,
+                            icon: payment.subscription.url ?
+                                `https://www.google.com/s2/favicons?domain=${new URL(payment.subscription.url).hostname}&sz=64` :
+                                undefined,
+                            requireInteraction: true // Make notification persist until user interacts with it
+                        });
+                        
+                        // Record that we've sent this notification
+                        saveSentNotification({
+                            subscriptionId: payment.subscription.id,
+                            paymentDate: payment.date.toISOString(),
+                            sentAt: new Date().toISOString()
+                        });
+                    }
+                } catch (error) {
+                    console.error('Failed to send notification:', error);
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error in notification processing:', error);
+    }
 }
 
 // Start checking for notifications when the window loads
 if (typeof window !== 'undefined') {
     window.addEventListener('load', async () => {
-        const permissionGranted = await requestAndVerifyPermission();
-        if (permissionGranted) {
-            // Check immediately and then every hour
-            checkAndScheduleNotifications();
-            setInterval(checkAndScheduleNotifications, 60 * 60 * 1000);
+        try {
+            const permissionGranted = await requestAndVerifyPermission();
+            if (permissionGranted) {
+                // Check immediately and then every hour
+                checkAndScheduleNotifications();
+                setInterval(checkAndScheduleNotifications, 60 * 60 * 1000);
+            }
+        } catch (error) {
+            console.error('Error initializing notifications:', error);
         }
     });
 }
