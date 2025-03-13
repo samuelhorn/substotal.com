@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Switch } from '../ui/switch';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 
 export default function AnalyticsPreferences() {
     const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
@@ -26,24 +27,26 @@ export default function AnalyticsPreferences() {
     };
 
     return (
-        <div className="space-y-4 p-4 border rounded-md">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h3 className="font-medium">Analytics Cookies</h3>
-                    <p className="text-sm text-muted-foreground">
-                        Allow us to analyze usage so we can measure and improve the performance of our site
-                    </p>
-                </div>
+        <Card>
+
+            <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="font-medium">Analytics Cookies</CardTitle>
                 <Switch
                     checked={analyticsEnabled}
                     onCheckedChange={handleToggle}
                     aria-label="Toggle analytics"
                 />
-            </div>
-            <p className="text-xs text-muted-foreground">
-                These cookies help us understand how visitors interact with our website by collecting
-                and reporting information anonymously.
-            </p>
-        </div>
+            </CardHeader>
+            <CardContent className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                    Allow us to analyze usage so we can measure and improve the performance of our site
+                </p>
+                <p className="text-sm text-muted-foreground">
+                    These cookies help us understand how visitors interact with our website by collecting
+                    and reporting information anonymously.
+                </p>
+
+            </CardContent>
+        </Card>
     );
 }

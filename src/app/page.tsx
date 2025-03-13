@@ -13,7 +13,7 @@ export default function LandingPage() {
             {/* Hero Section */}
             <header className="container mx-auto px-4 pt-24 pb-16 text-center">
                 <StarRating />
-                <h1 className="text-7xl max-w-4xl mx-auto font-bold tracking-tighter mb-6">Track Your Subscriptions and Take Control of Your Spending</h1>
+                <h1 className="text-5xl sm:text-7xl max-w-4xl mx-auto font-bold tracking-tighter mb-6">Track Your Subscriptions and Take Control of Your Spending</h1>
                 <p className="text-2xl text-muted-foreground max-w-2xl mx-auto mb-8">
                     Manage all your subscriptions in one place.<br />No account required, completely private, and forever free.
                 </p>

@@ -1,8 +1,7 @@
 "use client"
 
 import { ThemeToggle } from "@/components/theme-toggle";
-import { NotificationSettingsDialog } from "@/components/notification-settings-dialog";
-import { ImportExportDialog } from "@/components/import-export";
+import { SettingsDialog } from "@/components/settings-dialog";
 import { CurrencySelect } from "@/components/currency-select";
 import { useCurrency } from "@/components/currency-context";
 import { usePathname } from "next/navigation";
@@ -27,8 +26,7 @@ export function Header({
             </Link>
             <div className="flex items-center gap-2">
                 <ThemeToggle />
-                <NotificationSettingsDialog />
-                <ImportExportDialog />
+                <SettingsDialog />
                 {showCurrencySelect && (
                     <CurrencySelect
                         value={primaryCurrency}

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { Button } from './ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './ui/dialog'
 import { loadAppState } from '@/lib/storage'
-import { ImportExport } from './import-export'
 import { SubscriptionFormDialog } from './subscription-form-dialog'
 import { addSubscription, importTestData } from '@/lib/subscriptions'
 import { toast } from 'sonner'
@@ -50,21 +49,13 @@ export function WelcomeModal() {
                     <p>We are not like other subscription trackers. We don&apos;t need your bank details or personal information. And we&apos;re completely free!</p>
                     <p>We believe in privacy and security. Get started by importing your existing subscriptions or adding a new one. The data is stored locally in your browser.</p>
                     <DialogFooter className="flex flex-col sm:flex-row gap-2 items-center justify-end pt-4">
-                        <Button
-                            variant="outline"
-                            onClick={handleImportTestData}
-                        >
-                            Try with demo data
-                        </Button>
                         <div className="flex flex-row gap-2">
-                            <ImportExport
-                                onImportComplete={() => setIsOpen(false)}
-                                buttonProps={{
-                                    variant: "outline",
-                                    size: "default",
-                                }}
-                                buttonLabel="Import data"
-                            />
+                            <Button
+                                variant="outline"
+                                onClick={handleImportTestData}
+                            >
+                                Try with demo data
+                            </Button>
                             <Button
                                 onClick={() => {
                                     setShowSubscriptionForm(true)
