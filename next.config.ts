@@ -5,8 +5,13 @@ const nextConfig: NextConfig = {
 
   // add www.google.com to the list of image domains
   images: {
-    domains: ["www.google.com"],
-  },
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'www.google.com',
+      },
+    ],
+  }
 };
 
 export default nextConfig;
