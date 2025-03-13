@@ -96,7 +96,7 @@ export function CategoryBreakdownChart({
                 <div className="flex items-start justify-between">
                     <div className="flex flex-col gap-1.5">
                         <CardTitle>Category Breakdown</CardTitle>
-                        <CardDescription>
+                        <CardDescription className="mt-1">
                             {isClient && (
                                 <>
                                     Your {viewMode === 'yearly' ? 'yearly' : 'monthly'} expenses by category
@@ -121,21 +121,16 @@ export function CategoryBreakdownChart({
             <CardContent>
                 <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={categoryData} margin={{ left: 20, right: 20, top: 20, bottom: 20 }}>
+                        <BarChart data={categoryData} margin={{ top: 20, right: 20, left: 20, bottom: 20 }}>
                             <CartesianGrid
-                                strokeDasharray="2 2"
+                                strokeDasharray="3 3"
                                 stroke="#6f665c"
-                                strokeOpacity={0.5}
+                                strokeOpacity={0.4}
                             />
                             <XAxis
                                 dataKey="category"
                                 stroke="#6f665c"
-                                label={{
-                                    value: 'Categories',
-                                    position: 'insideBottom',
-                                    offset: -20,
-                                    style: { fill: "#6f665c" }
-                                }}
+                                tick={{ fontSize: 14 }}
                             />
                             <YAxis
                                 stroke="#6f665c"
@@ -144,7 +139,8 @@ export function CategoryBreakdownChart({
                                     angle: -90,
                                     position: 'insideLeft',
                                     style: { fill: "#6f665c" },
-                                    offset: 0
+                                    offset: 0,
+                                    fontSize: 14,
                                 }}
                             />
                             <Tooltip content={<CustomTooltip />} cursor={{
@@ -169,6 +165,6 @@ export function CategoryBreakdownChart({
                     </ResponsiveContainer>
                 </div>
             </CardContent>
-        </Card>
+        </Card >
     );
 }

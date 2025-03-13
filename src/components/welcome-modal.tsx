@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { loadAppState } from '@/lib/storage'
 import { ImportExport } from './import-export'
 import { SubscriptionFormDialog } from './subscription-form-dialog'
-import { addSubscription } from '@/lib/subscriptions'
+import { addSubscription, importTestData } from '@/lib/subscriptions'
 import { toast } from 'sonner'
 
 export function WelcomeModal() {
@@ -28,6 +28,15 @@ export function WelcomeModal() {
         window.location.reload()
     }
 
+    // Handler for importing test data
+    const handleImportTestData = () => {
+        importTestData()
+        toast.success('Added demo subscriptions to help you explore')
+        setIsOpen(false)
+        // Force page reload to update the UI with the test subscriptions
+        window.location.reload()
+    }
+
     return (
         <>
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -40,23 +49,31 @@ export function WelcomeModal() {
                     </DialogHeader>
                     <p>We are not like other subscription trackers. We don&apos;t need your bank details or personal information. And we&apos;re completely free!</p>
                     <p>We believe in privacy and security. Get started by importing your existing subscriptions or adding a new one. The data is stored locally in your browser.</p>
-                    <DialogFooter className="flex flex-row gap-2 items-center justify-end pt-4">
-                        <ImportExport
-                            onImportComplete={() => setIsOpen(false)}
-                            buttonProps={{
-                                variant: "outline",
-                                size: "default",
-                            }}
-                            buttonLabel="Import data"
-                        />
+                    <DialogFooter className="flex flex-col sm:flex-row gap-2 items-center justify-end pt-4">
                         <Button
-                            onClick={() => {
-                                setShowSubscriptionForm(true)
-                                setIsOpen(false)
-                            }}
+                            variant="outline"
+                            onClick={handleImportTestData}
                         >
-                            Add subscription
+                            Try with demo data
                         </Button>
+                        <div className="flex flex-row gap-2">
+                            <ImportExport
+                                onImportComplete={() => setIsOpen(false)}
+                                buttonProps={{
+                                    variant: "outline",
+                                    size: "default",
+                                }}
+                                buttonLabel="Import data"
+                            />
+                            <Button
+                                onClick={() => {
+                                    setShowSubscriptionForm(true)
+                                    setIsOpen(false)
+                                }}
+                            >
+                                Add subscription
+                            </Button>
+                        </div>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

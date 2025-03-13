@@ -73,7 +73,7 @@ export function CostSummaryCards({
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Monthly Cost</CardTitle>
+                    <CardTitle>Monthly Cost</CardTitle>
                     <CalendarDays className="h-6 w-6 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
@@ -86,7 +86,7 @@ export function CostSummaryCards({
 
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Yearly Cost</CardTitle>
+                    <CardTitle>Yearly Cost</CardTitle>
                     <CalendarRange className="h-6 w-6 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
@@ -99,7 +99,7 @@ export function CostSummaryCards({
 
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Locked-In Cost</CardTitle>
+                    <CardTitle>Locked-In Cost</CardTitle>
                     <LockIcon className="h-6 w-6 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>

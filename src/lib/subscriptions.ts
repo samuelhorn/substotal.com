@@ -40,6 +40,64 @@ export function addSubscription(subscription: Subscription): Subscription[] {
     return updatedSubscriptions;
 }
 
+// Function to generate test subscription data
+export function generateTestData(): Subscription[] {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const inTwoDays = new Date();
+    inTwoDays.setDate(inTwoDays.getDate() + 2);
+    const inFiveDays = new Date();
+    inFiveDays.setDate(inFiveDays.getDate() + 5);
+
+    // Create three subscriptions in different categories
+    const testSubscriptions: Subscription[] = [
+        {
+            id: `test-${Date.now()}-1`,
+            name: "PlayStation Plus Extra",
+            amount: 14.99,
+            frequency: "monthly",
+            startDate: tomorrow.toISOString(),
+            category: "Gaming",
+            currency: "USD",
+            url: "https://playstation.com",
+            hidden: false
+        },
+        {
+            id: `test-${Date.now()}-2`,
+            name: "Spotify Premium",
+            amount: 9.99,
+            frequency: "monthly",
+            startDate: inTwoDays.toISOString(),
+            category: "Music",
+            currency: "USD",
+            url: "https://spotify.com",
+            hidden: false
+        },
+        {
+            id: `test-${Date.now()}-3`,
+            name: "Slack Pro",
+            amount: 150,
+            frequency: "yearly",
+            startDate: inFiveDays.toISOString(),
+            category: "Productivity",
+            currency: "USD",
+            url: "https://slack.com",
+            hidden: false
+        }
+    ];
+
+    return testSubscriptions;
+}
+
+// Function to import test data
+export function importTestData(): Subscription[] {
+    const testSubscriptions = generateTestData();
+    const currentSubscriptions = loadSubscriptions();
+    const updatedSubscriptions = [...currentSubscriptions, ...testSubscriptions];
+    saveSubscriptions(updatedSubscriptions);
+    return updatedSubscriptions;
+}
+
 // Function to update an existing subscription
 export function updateSubscription(updatedSubscription: Subscription): Subscription[] {
     const subscriptions = loadSubscriptions();

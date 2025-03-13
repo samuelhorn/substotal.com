@@ -11,7 +11,8 @@ import {
     TooltipProps,
     ZAxis,
     Cell,
-    CartesianGrid
+    CartesianGrid,
+    LabelList
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Subscription } from "@/lib/subscriptions";
@@ -19,6 +20,7 @@ import { convertAmount } from "@/lib/currency";
 import { formatCurrency } from "@/lib/utils";
 import { ChartTooltipWrapper } from "@/components/ui/chart-components";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "motion/react";
 
 interface UpcomingPaymentsChartProps {
     subscriptions: Subscription[];
@@ -105,9 +107,9 @@ export function UpcomingPaymentsChart({
                         showDecimals: true,
                         currencyDisplay: "narrowSymbol"
                     })}</p>
-                    <div className="mt-2">
+                    <div className="text-sm text-gray-500">
                         {data.subscriptions.map((sub: Subscription) => (
-                            <div key={sub.id} className="text-sm">
+                            <div key={sub.id}>
                                 {sub.name} - {formatCurrency(convertToPrimary(sub.amount, sub.currency), primaryCurrency, {
                                     showDecimals: true,
                                     currencyDisplay: "narrowSymbol"
@@ -121,31 +123,71 @@ export function UpcomingPaymentsChart({
         return null;
     };
 
+    const renderCustomizedLabel = (props: any) => {
+        const { x, y, value } = props;
+
+        console.log(value);
+
+        return (
+            <AnimatePresence mode="popLayout">
+                {value > 0 && (
+                    <motion.text
+                        initial={{
+                            opacity: 0,
+                            scale: 1,
+                            y: y + 10,
+                            x: x + 28
+                        }}
+                        animate={{
+                            opacity: 1,
+                            scale: 1,
+                            y: y + 10,
+                            x: x + 18
+                        }}
+                        exit={{
+                            opacity: 0,
+                            scale: 1,
+                            y: y + 10,
+                            x: x + 18
+                        }}
+                        transition={{ duration: 0.25, ease: [0, 0.6, 1.2, 1] }}
+                        fill="currentColor"
+                        fontSize={18}
+                        fontWeight="bold"
+                        textAnchor="right"
+                    >
+                        {formatCurrency(value, primaryCurrency, {
+                            showDecimals: false,
+                            currencyDisplay: "narrowSymbol"
+                        })}
+                    </motion.text>
+                )}
+            </AnimatePresence>
+        );
+    };
+
     return (
         <Card>
             <CardHeader>
                 <CardTitle>Upcoming Payments</CardTitle>
-                <CardDescription>
+                <CardDescription className="mt-1">
                     Your subscription payments for the next 30 days
                 </CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                        <ScatterChart
-                            margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-                        >
+                        <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                             <CartesianGrid
-                                strokeDasharray="2 2"
+                                strokeDasharray="3 3"
                                 stroke="#6f665c"
-                                strokeOpacity={0.5}
+                                strokeOpacity={0.4}
                             />
                             <XAxis
                                 dataKey="dateString"
                                 name="Date"
                                 stroke="#6f665c"
-                                tick={{ fontSize: 12 }}
-                                label={{ value: 'Date', position: 'insideBottom', offset: -20, style: { fill: "#6f665c" } }}
+                                tick={{ fontSize: 14 }}
                             />
                             <YAxis
                                 dataKey="value"
@@ -154,12 +196,13 @@ export function UpcomingPaymentsChart({
                                 label={{
                                     value: `Amount (${primaryCurrency})`,
                                     angle: -90,
+                                    position: "insideLeft",
+                                    style: { fill: "#6f665c" },
+                                    fontSize: 14,
                                     offset: 0,
-                                    position: 'insideLeft',
-                                    style: { fill: "#6f665c" }
                                 }}
                             />
-                            <ZAxis range={[100, 400]} />
+                            <ZAxis dataKey="value" range={[80, 80]} />
                             <Tooltip content={<CustomTooltip />} cursor={{
                                 stroke: 'rgba(255, 255, 255, 0.15)',
                             }} />
@@ -167,9 +210,23 @@ export function UpcomingPaymentsChart({
                                 name="Payments"
                                 data={paymentsData}
                             >
+                                <LabelList
+                                    content={renderCustomizedLabel}
+                                    dataKey="value"
+                                    fontSize={18}
+                                    fontWeight="bold"
+                                    position="right"
+                                    offset={8}
+                                    formatter={(value: number) => formatCurrency(value, primaryCurrency, {
+                                        showDecimals: false,
+                                        currencyDisplay: "narrowSymbol"
+                                    })}
+                                />
                                 {
                                     paymentsData.map((entry, index) => (
                                         <Cell
+                                            width={10}
+                                            height={10}
                                             className={cn({
                                                 "text-chart-1": index % 5 === 0,
                                                 "text-chart-2": index % 5 === 1,
