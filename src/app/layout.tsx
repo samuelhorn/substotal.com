@@ -7,6 +7,8 @@ import { CurrencyProvider } from "@/components/currency-context";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { ErrorBoundary } from "@/components/error-boundary";
+import GoogleAnalyticsProvider from "@/components/analytics/google-analytics";
+import ConsentBanner from "@/components/analytics/consent-banner";
 
 const gabarito = Gabarito({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
@@ -20,6 +22,9 @@ export const viewport: Viewport = {
   initialScale: 1,
   themeColor: "#ffffff",
 };
+
+// Replace with your actual Google Analytics measurement ID
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-XXXXXXXXXX";
 
 export default function RootLayout({
   children,
@@ -43,6 +48,10 @@ export default function RootLayout({
               </main>
               <Footer />
               <Toaster />
+
+              {/* Google Analytics with privacy consent */}
+              <GoogleAnalyticsProvider measurementId={GA_MEASUREMENT_ID} />
+              <ConsentBanner />
             </ErrorBoundary>
           </CurrencyProvider>
         </ThemeProvider>

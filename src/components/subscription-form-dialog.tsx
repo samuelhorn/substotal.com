@@ -127,6 +127,10 @@ export function SubscriptionFormDialog({
             });
         }
         setIsOpen(false);
+
+        if (window.gtag) {
+            window.gtag('event', 'subscription_added');
+        }
     }
 
     const formContent = (
