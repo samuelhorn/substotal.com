@@ -34,7 +34,7 @@ export default function LandingPage() {
                     <div className="max-w-3xl mx-auto text-center">
                         <h2 className="text-4xl font-bold mb-6">Take Control of Your Subscription Costs</h2>
                         <p className="text-lg mb-6 text-muted-foreground">
-                            In today's subscription economy, the average person spends over $273 monthly on subscriptions –
+                            In today&apos;s subscription economy, the average person spends over $273 monthly on subscriptions –
                             often without realizing it. Substotal helps you track, manage, and optimize your recurring expenses
                             with a simple, privacy-focused tool.
                         </p>
@@ -54,7 +54,7 @@ export default function LandingPage() {
                                 <CardContent className="pt-4">
                                     <Lock className="text-primary mb-4 w-12 h-12" />
                                     <h4 className="text-xl font-bold mb-2">Track Commitments</h4>
-                                    <p className="text-muted-foreground">Identify locked-in subscriptions you can't cancel yet</p>
+                                    <p className="text-muted-foreground">Identify locked-in subscriptions you can&apos;t cancel yet</p>
                                 </CardContent>
                             </Card>
                             <Card>
@@ -116,8 +116,8 @@ export default function LandingPage() {
                                 <CardContent className="pt-6">
                                     <StarRating />
                                     <p className="italic mb-4">
-                                        "I had no idea I was spending almost $300 a month on subscriptions until I used Substotal.
-                                        I've already cut over $85 in monthly expenses!"
+                                        &quot;I had no idea I was spending almost $300 a month on subscriptions until I used Substotal.
+                                        I&apos;ve already cut over $85 in monthly expenses!&quot;
                                     </p>
                                     <p className="text-muted-foreground">— Eric S.</p>
                                 </CardContent>
@@ -126,8 +126,8 @@ export default function LandingPage() {
                                 <CardContent className="pt-6">
                                     <StarRating />
                                     <p className="italic mb-4">
-                                        "As someone who values privacy, I love that Substotal works without an account
-                                        and keeps my data on my device."
+                                        &quot;As someone who values privacy, I love that Substotal works without an account
+                                        and keeps my data on my device.&quot;
                                     </p>
                                     <p className="text-muted-foreground">— Maria L.</p>
                                 </CardContent>
@@ -136,7 +136,7 @@ export default function LandingPage() {
                                 <CardContent className="pt-6">
                                     <StarRating />
                                     <p className="italic mb-4">
-                                        "The simplest way to track subscriptions I've found. No bloat, just what I need."
+                                        &quot;The simplest way to track subscriptions I&apos;ve found. No bloat, just what I need.&quot;
                                     </p>
                                     <p className="text-muted-foreground">— John P.</p>
                                 </CardContent>
@@ -220,7 +220,7 @@ export default function LandingPage() {
                         <AccordionItem value="item-1">
                             <AccordionTrigger className="text-2xl font-bold">Is Substotal really free?</AccordionTrigger>
                             <AccordionContent>
-                                Yes, Substotal is completely free to use. We don't collect your data or show ads.
+                                Yes, Substotal is completely free to use. We don&apos;t collect your data or show ads.
                             </AccordionContent>
                         </AccordionItem>
 
@@ -255,7 +255,7 @@ export default function LandingPage() {
                         <AccordionItem value="item-6">
                             <AccordionTrigger className="text-2xl font-bold">Can Substotal automatically detect my subscriptions?</AccordionTrigger>
                             <AccordionContent>
-                                No. To maintain your privacy, Substotal doesn't connect to your bank or email accounts. You add subscriptions manually.
+                                No. To maintain your privacy, Substotal doesn&apos;t connect to your bank or email accounts. You add subscriptions manually.
                             </AccordionContent>
                         </AccordionItem>
                     </Accordion>

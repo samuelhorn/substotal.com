@@ -38,7 +38,7 @@ export function WelcomeModal() {
                             Your personal subscription tracker to help you manage all your recurring payments in one place.
                         </DialogDescription>
                     </DialogHeader>
-                    <p>We are not like other subscription trackers. We don't need your bank details or personal information. And we're completely free!</p>
+                    <p>We are not like other subscription trackers. We don&apos;t need your bank details or personal information. And we&apos;re completely free!</p>
                     <p>We believe in privacy and security. Get started by importing your existing subscriptions or adding a new one. The data is stored locally in your browser.</p>
                     <DialogFooter className="flex flex-row gap-2 items-center justify-end pt-4">
                         <ImportExport
