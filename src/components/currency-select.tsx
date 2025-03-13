@@ -30,7 +30,7 @@ export function CurrencySelect({ value, onValueChange }: CurrencySelectProps) {
                     />
                     <SelectValue placeholder="Select" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent align="end">
                     {CURRENCIES.map((currency) => (
                         <SelectItem key={currency} value={currency}>
                             {currency}

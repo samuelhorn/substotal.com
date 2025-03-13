@@ -4,8 +4,11 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { NotificationsInit } from "@/components/notifications-init";
 import { ThemeProvider } from "@/components/theme-provider"
+import { CurrencyProvider } from "@/components/currency-context";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
-const gabarito = Gabarito({ subsets: ["latin"] });
+const gabarito = Gabarito({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
 export const metadata: Metadata = {
   title: "Subscription Tracker",
@@ -25,16 +28,22 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={gabarito.className}>
+      <body className={`${gabarito.className} antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <Toaster />
-          <NotificationsInit />
+          <CurrencyProvider>
+            <Header />
+            <main className="container mx-auto">
+              {children}
+            </main>
+            <Footer />
+            <Toaster />
+            <NotificationsInit />
+          </CurrencyProvider>
         </ThemeProvider>
       </body>
     </html>

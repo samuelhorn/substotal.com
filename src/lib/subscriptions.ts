@@ -12,7 +12,7 @@ export const subscriptionSchema = z.object({
     commitmentEndDate: z.string().optional(),
     category: z.string(),
     currency: z.string().default("USD"),
-    url: z.string().url("Invalid URL").optional(),
+    url: z.string().url("Invalid URL").optional().nullable(),
     hidden: z.boolean().default(false),
 });
 

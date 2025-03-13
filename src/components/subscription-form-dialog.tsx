@@ -100,7 +100,7 @@ export function SubscriptionFormDialog({
             commitmentEndDate: subscription?.commitmentEndDate,
             category: subscription?.category || "Other",
             currency: subscription?.currency || loadPrimaryCurrency() || "USD",
-            url: subscription?.url || "",
+            url: subscription?.url || null,
         },
     });
 
@@ -131,7 +131,7 @@ export function SubscriptionFormDialog({
 
     const formContent = (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
                 <FormField
                     control={form.control}
                     name="name"
@@ -165,7 +165,7 @@ export function SubscriptionFormDialog({
                     )}
                 />
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                     <FormField
                         control={form.control}
                         name="amount"
@@ -196,7 +196,7 @@ export function SubscriptionFormDialog({
                                     onValueChange={field.onChange}
                                     value={field.value}
                                 >
-                                    <FormControl>
+                                    <FormControl className="w-full">
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select currency" />
                                         </SelectTrigger>
@@ -213,32 +213,34 @@ export function SubscriptionFormDialog({
                             </FormItem>
                         )}
                     />
+
+                    <FormField
+                        control={form.control}
+                        name="frequency"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Billing Frequency</FormLabel>
+                                <Select
+                                    onValueChange={field.onChange}
+                                    value={field.value}
+                                >
+                                    <FormControl className="w-full">
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select frequency" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="monthly">Monthly</SelectItem>
+                                        <SelectItem value="yearly">Yearly</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                 </div>
 
-                <FormField
-                    control={form.control}
-                    name="frequency"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Billing Frequency</FormLabel>
-                            <Select
-                                onValueChange={field.onChange}
-                                value={field.value}
-                            >
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select frequency" />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    <SelectItem value="monthly">Monthly</SelectItem>
-                                    <SelectItem value="yearly">Yearly</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+
 
                 <FormField
                     control={form.control}
@@ -250,7 +252,7 @@ export function SubscriptionFormDialog({
                                 onValueChange={field.onChange}
                                 value={field.value}
                             >
-                                <FormControl>
+                                <FormControl className="w-full">
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select category" />
                                     </SelectTrigger>
@@ -272,7 +274,7 @@ export function SubscriptionFormDialog({
                     control={form.control}
                     name="startDate"
                     render={({ field }) => (
-                        <FormItem className="flex flex-col">
+                        <FormItem className="flex flex-col items-stretch">
                             <FormLabel>Start Date</FormLabel>
                             <Popover>
                                 <PopoverTrigger asChild>
@@ -290,7 +292,7 @@ export function SubscriptionFormDialog({
                                         </Button>
                                     </FormControl>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
+                                <PopoverContent className="p-0" align="start">
                                     <Calendar
                                         mode="single"
                                         selected={field.value ? new Date(field.value) : undefined}

@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { exportAppState, importAppState } from "@/lib/storage";
@@ -5,8 +7,16 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { DatabaseBackup } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { ComponentProps } from "react";
 
-export function ImportExportDialog() {
+interface ImportExportProps {
+    onImportComplete?: () => void;
+    buttonProps?: ComponentProps<typeof Button>;
+    buttonLabel?: string;
+}
+
+// Main component that can be used in various contexts
+export function ImportExport({ onImportComplete, buttonProps, buttonLabel }: ImportExportProps) {
     const [open, setOpen] = useState(false);
     const [importData, setImportData] = useState('');
 
@@ -26,7 +36,6 @@ export function ImportExportDialog() {
         // Cleanup
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-
         toast.success('Settings exported successfully');
         setOpen(false);
     };
@@ -41,6 +50,12 @@ export function ImportExportDialog() {
             if (importAppState(importData)) {
                 toast.success('Settings imported successfully');
                 setOpen(false);
+
+                // Call the callback if provided
+                if (onImportComplete) {
+                    onImportComplete();
+                }
+
                 // Reload the page to reflect changes
                 window.location.reload();
             } else {
@@ -54,9 +69,16 @@ export function ImportExportDialog() {
 
     return (
         <>
-            <Button variant="outline" onClick={() => setOpen(true)} size="icon">
-                <DatabaseBackup className="w-4 h-4" />
+            <Button
+                variant={buttonProps?.variant || "outline"}
+                onClick={() => setOpen(true)}
+                size={buttonProps?.size || "icon"}
+                className={buttonProps?.className}
+                disabled={buttonProps?.disabled}
+            >
+                {buttonLabel ? buttonLabel : <DatabaseBackup className="w-4 h-4" />}
             </Button>
+
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent>
                     <DialogHeader>
@@ -65,12 +87,14 @@ export function ImportExportDialog() {
                             Export your settings to backup or transfer to another browser, or import previously exported settings.
                         </DialogDescription>
                     </DialogHeader>
+
                     <div className="flex flex-col gap-4">
                         <div>
                             <Button onClick={handleExport} className="w-full">
                                 Export Settings
                             </Button>
                         </div>
+
                         <div className="space-y-2">
                             <Textarea
                                 placeholder="Paste your backup data here to import..."
@@ -87,4 +111,9 @@ export function ImportExportDialog() {
             </Dialog>
         </>
     );
+}
+
+// For backward compatibility with existing usage
+export function ImportExportDialog() {
+    return <ImportExport />;
 }
