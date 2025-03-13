@@ -22,7 +22,7 @@ export function NotificationSettingsDialog() {
                     </DialogHeader>
                     <div className="flex flex-col gap-4 items-center py-6">
                         <p className="text-muted-foreground text-center">
-                            Notifications are coming soon! We're working on implementing this feature to help you stay on top of your subscriptions.
+                            Notifications are coming soon! We&apos;re working on implementing this feature to help you stay on top of your subscriptions.
                         </p>
                         <p className="text-sm text-muted-foreground text-center">
                             Check back later for updates.
