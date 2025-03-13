@@ -1,4 +1,5 @@
 import { loadAppState, saveAppState } from "./storage";
+import { isNotificationSupported, getNotificationPermission, requestPermission } from "./notifications-utils";
 
 // Keys for localStorage
 export const CHART_VIEW_MODE_KEY = 'chart_view_mode';
@@ -62,26 +63,20 @@ export function saveNotificationSettings(settings: NotificationSettings) {
 }
 
 export function requestNotificationPermission(): Promise<boolean> {
-    if (!("Notification" in window)) {
+    if (!isNotificationSupported()) {
         return Promise.resolve(false);
     }
-    
-    // Only access Notification API properties if it exists
-    const permission = "Notification" in window ? Notification.permission : "denied";
-    
+
+    const permission = getNotificationPermission();
+
     if (permission === "granted") {
         return Promise.resolve(true);
     }
-    
-    if (permission === "denied") {
+
+    if (permission === "denied" || permission === "unsupported") {
         return Promise.resolve(false);
     }
-    
-    // Make sure we only call requestPermission when the API exists
-    if ("Notification" in window) {
-        return Notification.requestPermission()
-            .then(permission => permission === "granted");
-    }
-    
-    return Promise.resolve(false);
+
+    return requestPermission()
+        .then(permission => permission === "granted");
 }

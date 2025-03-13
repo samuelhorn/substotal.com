@@ -1,6 +1,12 @@
 import { getUpcomingPayments } from './subscriptions';
 import { loadNotificationSettings } from './settings';
 import { loadAppState } from './storage';
+import {
+    isNotificationSupported,
+    getNotificationPermission,
+    requestPermission,
+    createNotification
+} from './notifications-utils';
 
 const SENT_NOTIFICATIONS_KEY = 'sent_notifications';
 
@@ -38,24 +44,23 @@ function hasNotificationBeenSent(subscriptionId: string, paymentDate: Date): boo
 }
 
 export async function requestAndVerifyPermission(): Promise<boolean> {
-    if (!("Notification" in window)) {
+    if (!isNotificationSupported()) {
         return false;
     }
-    
-    // Safe access to Notification permission
-    const permission = Notification.permission;
-    
+
+    const permission = getNotificationPermission();
+
     if (permission === "granted") {
         return true;
     }
-    
-    if (permission === "denied") {
+
+    if (permission === "denied" || permission === "unsupported") {
         return false;
     }
-    
+
     try {
-        const permission = await Notification.requestPermission();
-        return permission === "granted";
+        const newPermission = await requestPermission();
+        return newPermission === "granted";
     } catch (error) {
         console.error('Error requesting notification permission:', error);
         return false;
@@ -67,39 +72,39 @@ export function checkAndScheduleNotifications() {
     if (typeof window === 'undefined') {
         return;
     }
-    
+
     // Double check permissions each time
-    if (!("Notification" in window)) {
+    if (!isNotificationSupported()) {
         return;
     }
-    
+
     // Safe access to Notification API
     try {
-        if (Notification.permission !== "granted") {
+        if (getNotificationPermission() !== "granted") {
             return;
         }
-        
+
         const { enabled, reminderDays } = loadNotificationSettings();
         if (!enabled) {
             return;
         }
-        
+
         const state = loadAppState();
         const upcomingPayments = getUpcomingPayments(state.subscriptions, reminderDays);
         const today = new Date();
-        
+
         upcomingPayments.forEach(payment => {
             const daysUntilPayment = Math.floor(
                 (payment.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
             );
-            
+
             // Notify if payment is within the reminder period and hasn't been notified
             if (daysUntilPayment <= reminderDays && !hasNotificationBeenSent(payment.subscription.id, payment.date)) {
                 const amount = new Intl.NumberFormat(undefined, {
                     style: 'currency',
                     currency: payment.subscription.currency
                 }).format(payment.amount);
-                
+
                 let message: string;
                 if (daysUntilPayment === 0) {
                     message = `${payment.subscription.name} payment of ${amount} is due today`;
@@ -108,26 +113,22 @@ export function checkAndScheduleNotifications() {
                 } else {
                     message = `${payment.subscription.name} payment of ${amount} is due in ${daysUntilPayment} days`;
                 }
-                
-                try {
-                    if ("Notification" in window) {
-                        new Notification("Upcoming Subscription Payment", {
-                            body: message,
-                            icon: payment.subscription.url ?
-                                `https://www.google.com/s2/favicons?domain=${new URL(payment.subscription.url).hostname}&sz=64` :
-                                undefined,
-                            requireInteraction: true // Make notification persist until user interacts with it
-                        });
-                        
-                        // Record that we've sent this notification
-                        saveSentNotification({
-                            subscriptionId: payment.subscription.id,
-                            paymentDate: payment.date.toISOString(),
-                            sentAt: new Date().toISOString()
-                        });
-                    }
-                } catch (error) {
-                    console.error('Failed to send notification:', error);
+
+                const notification = createNotification("Upcoming Subscription Payment", {
+                    body: message,
+                    icon: payment.subscription.url ?
+                        `https://www.google.com/s2/favicons?domain=${new URL(payment.subscription.url).hostname}&sz=64` :
+                        undefined,
+                    requireInteraction: true // Make notification persist until user interacts with it
+                });
+
+                if (notification) {
+                    // Record that we've sent this notification
+                    saveSentNotification({
+                        subscriptionId: payment.subscription.id,
+                        paymentDate: payment.date.toISOString(),
+                        sentAt: new Date().toISOString()
+                    });
                 }
             }
         });
