@@ -129,7 +129,10 @@ export function SubscriptionFormDialog({
         setIsOpen(false);
 
         if (window.gtag) {
-            window.gtag('event', 'subscription_added');
+            window.gtag('event', 'subscription_added', {
+                event_category: 'engagement',
+                event_label: values.name,
+            });
         }
     }
 
