@@ -47,9 +47,20 @@ export default function GoogleAnalyticsProvider({ measurementId }: Props) {
                 window.dataLayer?.push(args);
             };
 
+            // Important: Initialize Google's consent mode with default denied state
+            // This ensures all services respect consent settings even before the full GA script loads
+            window.gtag('consent', 'default', DEFAULT_CONSENT_STATE);
+
             // Check if user has previously given consent
             const hasConsent = localStorage.getItem('analytics_consent') === 'granted';
             setConsentGranted(hasConsent);
+
+            // If user already granted consent, update the consent state
+            if (hasConsent) {
+                window.gtag('consent', 'update', {
+                    analytics_storage: 'granted',
+                });
+            }
 
             // Set up consent handlers regardless of current consent state
             window.grantAnalyticsConsent = () => {
