@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Switch } from '../ui/switch';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 
 export default function AnalyticsPreferences() {
     const [analyticsEnabled, setAnalyticsEnabled] = useState(false);

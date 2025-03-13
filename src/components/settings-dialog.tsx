@@ -3,13 +3,12 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { Button } from './ui/button';
 import { CloudDownload, CloudUpload, Cog } from 'lucide-react';
-import { Separator } from './ui/separator';
 import AnalyticsPreferences from './analytics/analytics-preferences';
 import { exportAppState, importAppState } from "@/lib/storage";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 export function SettingsDialog() {
     const [open, setOpen] = useState(false);
@@ -122,7 +121,7 @@ export function SettingsDialog() {
                                         </CardHeader>
                                         <CardContent>
                                             <p className="text-sm text-muted-foreground">
-                                                Notifications are coming soon! We're working on implementing this feature to help you stay on top of your subscriptions.
+                                                Notifications are coming soon! We&apos;re working on implementing this feature to help you stay on top of your subscriptions.
                                             </p>
                                         </CardContent>
                                     </Card>
