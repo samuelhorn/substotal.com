@@ -1,5 +1,4 @@
 import { loadAppState, saveAppState } from "./storage";
-import { isNotificationSupported, getNotificationPermission, requestPermission } from "./notifications-utils";
 
 // Keys for localStorage
 export const CHART_VIEW_MODE_KEY = 'chart_view_mode';
@@ -7,6 +6,7 @@ export const TABLE_SORT_KEY = 'table_sort_settings';
 export const PRIMARY_CURRENCY_KEY = 'primary_currency_preference';
 
 export type ChartViewMode = 'monthly' | 'yearly';
+
 export type TableSortSettings = {
     column: string;
     direction: 'asc' | 'desc';
@@ -51,32 +51,14 @@ export function savePrimaryCurrency(currency: string) {
     saveAppState(state);
 }
 
+// Notification settings - preserved for future implementation
 export function loadNotificationSettings(): NotificationSettings {
     const state = loadAppState();
-    return state.settings.notifications;
+    return state.settings.notifications || { enabled: false, reminderDays: 1 };
 }
 
 export function saveNotificationSettings(settings: NotificationSettings) {
     const state = loadAppState();
     state.settings.notifications = settings;
     saveAppState(state);
-}
-
-export function requestNotificationPermission(): Promise<boolean> {
-    if (!isNotificationSupported()) {
-        return Promise.resolve(false);
-    }
-
-    const permission = getNotificationPermission();
-
-    if (permission === "granted") {
-        return Promise.resolve(true);
-    }
-
-    if (permission === "denied" || permission === "unsupported") {
-        return Promise.resolve(false);
-    }
-
-    return requestPermission()
-        .then(permission => permission === "granted");
 }

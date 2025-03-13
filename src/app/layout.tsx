@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Gabarito } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import { NotificationsInit } from "@/components/notifications-init";
 import { ThemeProvider } from "@/components/theme-provider"
 import { CurrencyProvider } from "@/components/currency-context";
 import { Header } from "@/components/header";
@@ -44,7 +43,6 @@ export default function RootLayout({
               </main>
               <Footer />
               <Toaster />
-              <NotificationsInit />
             </ErrorBoundary>
           </CurrencyProvider>
         </ThemeProvider>
