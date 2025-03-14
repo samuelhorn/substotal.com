@@ -64,7 +64,7 @@ export function SettingsDialog() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex flex-col gap-6 py-4">
-                        <Accordion type="multiple" className="w-full">
+                        <Accordion type="single" collapsible className="w-full">
                             <AccordionItem value="data-management">
                                 <AccordionTrigger>Data Management</AccordionTrigger>
                                 <AccordionContent className="space-y-4 CollapsibleContent">
@@ -95,7 +95,7 @@ export function SettingsDialog() {
                                                 placeholder="Paste your backup data here to import..."
                                                 value={importData}
                                                 onChange={(e) => setImportData(e.target.value)}
-                                                className="w-full min-h-[100px]"
+                                                className="w-full min-h-[70px]"
                                             />
                                             <div className="flex gap-4 items-center">
                                                 <p className="text-sm text-muted-foreground">

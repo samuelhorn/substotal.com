@@ -7,6 +7,7 @@ import { useCurrency } from "@/components/currency-context";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { LayoutDashboard } from "lucide-react";
 
 interface HeaderProps {
     showCurrencySelect?: boolean;
@@ -21,7 +22,7 @@ export function Header({
 
     return (
         <header className="flex justify-between items-center container py-6">
-            <Link href="/" className="text-3xl font-semibold tracking-tight">
+            <Link href="/" className="text-2xl sm:text-3xl font-semibold tracking-tight">
                 substotal
             </Link>
             <div className="flex items-center gap-2">
@@ -34,8 +35,11 @@ export function Header({
                     />
                 )}
                 {!isSubscriptionsPage && (
-                    <Button variant="secondary" asChild>
-                        <Link href="/subscriptions" className="block">Dashboard</Link>
+                    <Button variant="outline" asChild>
+                        <Link href="/subscriptions" className="block">
+                            <LayoutDashboard className="w-5 h-5" />
+                            <span className="sr-only sm:not-sr-only">Dashboard</span>
+                        </Link>
                     </Button>
                 )}
             </div>
