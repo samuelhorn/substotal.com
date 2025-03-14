@@ -2,19 +2,13 @@
 
 import { CategoryBreakdownChart } from "@/components/category-breakdown-chart";
 import { UpcomingPaymentsChart } from "@/components/upcoming-payments-chart";
-import { Subscription } from "@/lib/subscriptions";
+import { useSubscriptions } from "@/components/subscription-context";
+import { useCurrency } from "@/components/currency-context";
 
-interface SubscriptionChartsProps {
-    subscriptions: Subscription[];
-    primaryCurrency: string;
-    exchangeRates: Record<string, number>;
-}
+export function SubscriptionChartsSection() {
+    const { subscriptions } = useSubscriptions();
+    const { primaryCurrency, exchangeRates } = useCurrency();
 
-export function SubscriptionCharts({
-    subscriptions,
-    primaryCurrency = "USD",
-    exchangeRates
-}: SubscriptionChartsProps) {
     return (
         <>
             <CategoryBreakdownChart

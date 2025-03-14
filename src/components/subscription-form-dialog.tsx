@@ -64,6 +64,7 @@ interface SubscriptionFormDialogProps {
     showTriggerButton?: boolean;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
+    className?: string;
 }
 
 export function SubscriptionFormDialog({
@@ -75,6 +76,7 @@ export function SubscriptionFormDialog({
     showTriggerButton = true,
     open: externalOpen,
     onOpenChange: externalOnOpenChange,
+    className,
 }: SubscriptionFormDialogProps) {
     const [internalOpen, setInternalOpen] = useState(false);
 
@@ -363,7 +365,7 @@ export function SubscriptionFormDialog({
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             {showTriggerButton && (
                 <DialogTrigger asChild>
-                    <Button variant={buttonVariant} size={buttonSize}>{buttonLabel}</Button>
+                    <Button variant={buttonVariant} size={buttonSize} className={className}>{buttonLabel}</Button>
                 </DialogTrigger>
             )}
             <DialogContent className="sm:max-w-[425px]">

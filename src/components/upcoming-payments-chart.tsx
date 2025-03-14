@@ -21,6 +21,8 @@ import { formatCurrency } from "@/lib/utils";
 import { ChartTooltipWrapper } from "@/components/ui/chart-components";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "motion/react";
+import { useSubscriptions } from "./subscription-context";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface UpcomingPaymentsChartProps {
     subscriptions: Subscription[];
@@ -33,6 +35,8 @@ export function UpcomingPaymentsChart({
     primaryCurrency,
     exchangeRates
 }: UpcomingPaymentsChartProps) {
+    const { isLoading } = useSubscriptions();
+
     // Function to convert an amount to primary currency
     const convertToPrimary = (amount: number, fromCurrency: string) => {
         if (fromCurrency === primaryCurrency) return amount;
@@ -177,70 +181,76 @@ export function UpcomingPaymentsChart({
             <CardContent>
                 <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                        <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                            <CartesianGrid
-                                strokeDasharray="3 3"
-                                stroke="#6f665c"
-                                strokeOpacity={0.4}
-                            />
-                            <XAxis
-                                dataKey="dateString"
-                                name="Date"
-                                stroke="#6f665c"
-                                tick={{ fontSize: 14 }}
-                            />
-                            <YAxis
-                                dataKey="value"
-                                name="Amount"
-                                stroke="#6f665c"
-                                label={{
-                                    value: `Amount (${primaryCurrency})`,
-                                    angle: -90,
-                                    position: "insideLeft",
-                                    style: { fill: "#6f665c" },
-                                    fontSize: 14,
-                                    offset: 0,
-                                }}
-                            />
-                            <ZAxis dataKey="value" range={[80, 80]} />
-                            <Tooltip content={<CustomTooltip />} cursor={{
-                                stroke: 'rgba(255, 255, 255, 0.15)',
-                            }} />
-                            <Scatter
-                                name="Payments"
-                                data={paymentsData}
-                            >
-                                <LabelList
-                                    content={renderCustomizedLabel}
-                                    dataKey="value"
-                                    fontSize={18}
-                                    fontWeight="bold"
-                                    position="right"
-                                    offset={8}
-                                    formatter={(value: number) => formatCurrency(value, primaryCurrency, {
-                                        showDecimals: false,
-                                        currencyDisplay: "narrowSymbol"
-                                    })}
+                        {isLoading ? (
+                            <div className="p-5">
+                                <Skeleton className="h-[260px] w-full" />
+                            </div>
+                        ) : (
+                            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                                <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    stroke="#6f665c"
+                                    strokeOpacity={0.4}
                                 />
-                                {
-                                    paymentsData.map((entry, index) => (
-                                        <Cell
-                                            width={10}
-                                            height={10}
-                                            className={cn({
-                                                "text-chart-1": index % 5 === 0,
-                                                "text-chart-2": index % 5 === 1,
-                                                "text-chart-3": index % 5 === 2,
-                                                "text-chart-4": index % 5 === 3,
-                                                "text-chart-5": index % 5 === 4,
-                                            })}
-                                            key={`cell-${index}`}
-                                            fill="currentColor"
-                                        />
-                                    ))
-                                }
-                            </Scatter>
-                        </ScatterChart>
+                                <XAxis
+                                    dataKey="dateString"
+                                    name="Date"
+                                    stroke="#6f665c"
+                                    tick={{ fontSize: 14 }}
+                                />
+                                <YAxis
+                                    dataKey="value"
+                                    name="Amount"
+                                    stroke="#6f665c"
+                                    label={{
+                                        value: `Amount (${primaryCurrency})`,
+                                        angle: -90,
+                                        position: "insideLeft",
+                                        style: { fill: "#6f665c" },
+                                        fontSize: 14,
+                                        offset: 0,
+                                    }}
+                                />
+                                <ZAxis dataKey="value" range={[80, 80]} />
+                                <Tooltip content={<CustomTooltip />} cursor={{
+                                    stroke: 'rgba(255, 255, 255, 0.15)',
+                                }} />
+                                <Scatter
+                                    name="Payments"
+                                    data={paymentsData}
+                                >
+                                    <LabelList
+                                        content={renderCustomizedLabel}
+                                        dataKey="value"
+                                        fontSize={18}
+                                        fontWeight="bold"
+                                        position="right"
+                                        offset={8}
+                                        formatter={(value: number) => formatCurrency(value, primaryCurrency, {
+                                            showDecimals: false,
+                                            currencyDisplay: "narrowSymbol"
+                                        })}
+                                    />
+                                    {
+                                        paymentsData.map((entry, index) => (
+                                            <Cell
+                                                width={10}
+                                                height={10}
+                                                className={cn({
+                                                    "text-chart-1": index % 5 === 0,
+                                                    "text-chart-2": index % 5 === 1,
+                                                    "text-chart-3": index % 5 === 2,
+                                                    "text-chart-4": index % 5 === 3,
+                                                    "text-chart-5": index % 5 === 4,
+                                                })}
+                                                key={`cell-${index}`}
+                                                fill="currentColor"
+                                            />
+                                        ))
+                                    }
+                                </Scatter>
+                            </ScatterChart>
+                        )}
                     </ResponsiveContainer>
                 </div>
             </CardContent>

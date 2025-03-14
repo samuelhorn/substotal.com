@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
-import { SubscriptionsPageContent } from "@/components/subscriptions-page-content";
+import { SubscriptionProvider } from "@/components/subscription-context";
+import { SubscriptionSummarySection } from "@/components/subscription-summary-section";
+import { SubscriptionChartsSection } from "@/components/subscription-charts-section";
+import { SubscriptionTableSection } from "@/components/subscription-table-section";
+import { Separator } from "@/components/ui/separator";
+import { WelcomeModal } from "@/components/welcome-modal";
 
 const metaTitle = "Your Subscriptions | Substotal";
 const metaDescription = "Manage and track all your subscription expenses in one place with SubTrack.";
@@ -23,5 +28,29 @@ export const metadata: Metadata = {
 };
 
 export default function SubscriptionsPage() {
-  return <SubscriptionsPageContent />;
+  return (
+    <SubscriptionProvider>
+      <div className="space-y-8">
+        {/* Welcome Modal */}
+        <WelcomeModal />
+
+        {/* Cost Summary Cards */}
+        <SubscriptionSummarySection />
+
+        {/* Subscription Charts */}
+        <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <SubscriptionChartsSection />
+          </div>
+
+          <Separator className="my-6" />
+
+          {/* Subscription Table */}
+          <div>
+            <SubscriptionTableSection />
+          </div>
+        </div>
+      </div>
+    </SubscriptionProvider>
+  );
 }

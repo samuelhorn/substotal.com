@@ -25,6 +25,8 @@ import { formatCurrency } from "@/lib/utils";
 import { ChartTooltipWrapper } from "@/components/ui/chart-components";
 import { cn } from "@/lib/utils";
 import { loadChartViewMode, saveChartViewMode, type ChartViewMode } from '@/lib/settings';
+import { useSubscriptions } from "./subscription-context";
+import { Skeleton } from "./ui/skeleton";
 
 interface CategoryBreakdownChartProps {
     subscriptions: Subscription[];
@@ -37,6 +39,7 @@ export function CategoryBreakdownChart({
     primaryCurrency,
     exchangeRates
 }: CategoryBreakdownChartProps) {
+    const { isLoading } = useSubscriptions();
     const [viewMode, setViewMode] = useState<ChartViewMode>(() => loadChartViewMode());
     const [isClient, setIsClient] = useState(false);
 
@@ -104,16 +107,22 @@ export function CategoryBreakdownChart({
                             )}
                         </CardDescription>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-x-2">
                         <Label htmlFor="view-mode">Yearly View</Label>
-                        {isClient && (
-                            <Switch
-                                id="view-mode"
-                                checked={viewMode === 'yearly'}
-                                onCheckedChange={(checked) =>
-                                    setViewMode(checked ? 'yearly' : 'monthly')
-                                }
-                            />
+                        {isLoading ? (
+                            <Skeleton className="w-9 h-5 rounded-full" />
+                        ) : (
+                            <>
+                                {isClient && (
+                                    <Switch
+                                        id="view-mode"
+                                        checked={viewMode === 'yearly'}
+                                        onCheckedChange={(checked) =>
+                                            setViewMode(checked ? 'yearly' : 'monthly')
+                                        }
+                                    />
+                                )}
+                            </>
                         )}
                     </div>
                 </div>
@@ -121,47 +130,53 @@ export function CategoryBreakdownChart({
             <CardContent>
                 <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={categoryData} margin={{ top: 20, right: 20, left: 20, bottom: 20 }}>
-                            <CartesianGrid
-                                strokeDasharray="3 3"
-                                stroke="#6f665c"
-                                strokeOpacity={0.4}
-                            />
-                            <XAxis
-                                dataKey="category"
-                                stroke="#6f665c"
-                                tick={{ fontSize: 14 }}
-                            />
-                            <YAxis
-                                stroke="#6f665c"
-                                label={{
-                                    value: `Cost (${primaryCurrency})`,
-                                    angle: -90,
-                                    position: 'insideLeft',
-                                    style: { fill: "#6f665c" },
-                                    offset: 0,
-                                    fontSize: 14,
-                                }}
-                            />
-                            <Tooltip content={<CustomTooltip />} cursor={{
-                                fill: 'rgba(255, 255, 255, 0.05)',
-                            }} />
-                            <Bar dataKey="value">
-                                {categoryData.map((entry, index) => (
-                                    <Cell
-                                        className={cn({
-                                            "text-chart-1": index % 5 === 0,
-                                            "text-chart-2": index % 5 === 1,
-                                            "text-chart-3": index % 5 === 2,
-                                            "text-chart-4": index % 5 === 3,
-                                            "text-chart-5": index % 5 === 4,
-                                        })}
-                                        key={`cell-${index}`}
-                                        fill="currentColor"
-                                    />
-                                ))}
-                            </Bar>
-                        </BarChart>
+                        {isLoading ? (
+                            <div className="p-5">
+                                <Skeleton className="h-[260px] w-full" />
+                            </div>
+                        ) : (
+                            <BarChart data={categoryData} margin={{ top: 20, right: 20, left: 20, bottom: 20 }}>
+                                <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    stroke="#6f665c"
+                                    strokeOpacity={0.4}
+                                />
+                                <XAxis
+                                    dataKey="category"
+                                    stroke="#6f665c"
+                                    tick={{ fontSize: 14 }}
+                                />
+                                <YAxis
+                                    stroke="#6f665c"
+                                    label={{
+                                        value: `Cost (${primaryCurrency})`,
+                                        angle: -90,
+                                        position: 'insideLeft',
+                                        style: { fill: "#6f665c" },
+                                        offset: 0,
+                                        fontSize: 14,
+                                    }}
+                                />
+                                <Tooltip content={<CustomTooltip />} cursor={{
+                                    fill: 'rgba(255, 255, 255, 0.05)',
+                                }} />
+                                <Bar dataKey="value">
+                                    {categoryData.map((entry, index) => (
+                                        <Cell
+                                            className={cn({
+                                                "text-chart-1": index % 5 === 0,
+                                                "text-chart-2": index % 5 === 1,
+                                                "text-chart-3": index % 5 === 2,
+                                                "text-chart-4": index % 5 === 3,
+                                                "text-chart-5": index % 5 === 4,
+                                            })}
+                                            key={`cell-${index}`}
+                                            fill="currentColor"
+                                        />
+                                    ))}
+                                </Bar>
+                            </BarChart>
+                        )}
                     </ResponsiveContainer>
                 </div>
             </CardContent>
