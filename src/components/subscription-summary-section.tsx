@@ -10,7 +10,6 @@ import {
     calculateTotalMonthlyCost,
     calculateTotalYearlyCost,
     calculateLockedInCost,
-    Subscription
 } from "@/lib/subscriptions";
 import { formatCurrency } from "@/lib/utils";
 import { motion, useSpring, useMotionValue, useTransform } from "motion/react";
