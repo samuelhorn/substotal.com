@@ -14,8 +14,8 @@ export default function LandingPage() {
             <header className="container mx-auto px-4 pt-24 pb-16 text-center">
                 <StarRating />
                 <h1 className="text-5xl sm:text-7xl max-w-4xl mx-auto font-bold tracking-tighter mb-6">Track Your Subscriptions and Take Control of Your Spending</h1>
-                <p className="text-2xl text-muted-foreground max-w-2xl mx-auto mb-8">
-                    Manage all your subscriptions in one place.<br />No account required, completely private, and forever free.
+                <p className="text-lg sm:text-2xl text-muted-foreground max-w-2xl mx-auto mb-8">
+                    Manage all your subscriptions in one place.<br className="hidden sm:block" />No account required, completely private, and forever free.
                 </p>
                 <div className="flex flex-wrap gap-4 justify-center">
                     <Link href="/subscriptions">
@@ -29,9 +29,9 @@ export default function LandingPage() {
             </header>
 
             {/* Main Value Proposition */}
-            <section className="bg-accent rounded-2xl p-16">
+            <section className="bg-accent rounded-2xl py-12 lg:p-16">
                 <div className="container mx-auto px-4">
-                    <div className="max-w-3xl mx-auto text-center">
+                    <div className="max-w-3xl mx-auto text-center px-4">
                         <h2 className="text-4xl font-bold mb-6">Take Control of Your Subscription Costs</h2>
                         <p className="text-lg mb-6 text-muted-foreground">
                             In today&apos;s subscription economy, the average person spends over $273 monthly on subscriptions –
@@ -108,7 +108,7 @@ export default function LandingPage() {
 
             {/* Testimonials */}
             <section>
-                <div className="bg-card rounded-2xl p-16">
+                <div className="bg-card rounded-2xl py-12 lg:p-16">
                     <div className="container mx-auto px-4">
                         <h2 className="text-4xl font-bold mb-12 text-center">Why People Choose Substotal</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -264,8 +264,8 @@ export default function LandingPage() {
 
             {/* CTA Section */}
             <section className="bg-accent text-accent-foreground py-16 rounded-2xl">
-                <div className="max-w-3xl mx-auto px-4 text-center text-balance">
-                    <h2 className="text-5xl font-bold mb-6">Start Managing Your Subscriptions Today</h2>
+                <div className="max-w-3xl mx-auto px-6 text-center text-balance">
+                    <h2 className="text-4xl sm:text-5xl font-bold mb-6">Start Managing Your Subscriptions Today</h2>
                     <p className="text-xl mb-8">Join thousands of users who have taken control of their subscription expenses with Substotal.</p>
                     <div className="flex flex-wrap gap-4 justify-center">
                         <Link href="/subscriptions">
