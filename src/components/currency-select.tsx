@@ -9,35 +9,46 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import ReactCountryFlag from "react-country-flag"
+import { useCurrency } from '@/components/app-provider'
+import { Skeleton } from './ui/skeleton'
 
-interface CurrencySelectProps {
-    value: string
-    onValueChange: (value: string) => void
-}
+export function CurrencySelect() {
+    const { primaryCurrency, setPrimaryCurrency, isLoading } = useCurrency();
 
-export function CurrencySelect({ value, onValueChange }: CurrencySelectProps) {
     return (
         <div className="flex items-center gap-2">
-            <Select value={value} onValueChange={onValueChange}>
-                <SelectTrigger>
-                    <ReactCountryFlag
-                        countryCode={CURRENCY_COUNTRY_CODES[value as keyof typeof CURRENCY_COUNTRY_CODES]}
-                        style={{
-                            fontSize: '1.25em',
-                            lineHeight: '1.25em',
-                        }}
-                        svg
-                    />
-                    <SelectValue placeholder="Select" />
-                </SelectTrigger>
-                <SelectContent align="end">
-                    {CURRENCIES.map((currency) => (
-                        <SelectItem key={currency} value={currency}>
-                            {currency}
-                        </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
-        </div>
+            {isLoading ? (
+                <Skeleton className='w-28 h-9' />
+            ) : (
+
+                <Select
+                    value={primaryCurrency}
+                    onValueChange={setPrimaryCurrency}
+                    disabled={isLoading}
+                >
+                    <SelectTrigger className="w-28">
+                        {primaryCurrency && (
+                            <ReactCountryFlag
+                                countryCode={CURRENCY_COUNTRY_CODES[primaryCurrency as keyof typeof CURRENCY_COUNTRY_CODES]}
+                                style={{
+                                    fontSize: '1.25em',
+                                    lineHeight: '1.25em',
+                                }}
+                                svg
+                            />
+                        )}
+                        <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent align="end">
+                        {CURRENCIES.map((currency) => (
+                            <SelectItem key={currency} value={currency}>
+                                {currency}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            )
+            }
+        </div >
     )
 }

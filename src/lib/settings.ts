@@ -1,9 +1,5 @@
-import { loadAppState, saveAppState } from "./storage";
-
-// Keys for localStorage
-export const CHART_VIEW_MODE_KEY = 'chart_view_mode';
-export const TABLE_SORT_KEY = 'table_sort_settings';
-export const PRIMARY_CURRENCY_KEY = 'primary_currency_preference';
+import { loadAppState, loadAppStateAsync, saveAppState, saveAppStateAsync } from "./storage";
+import { createClient } from "./supabase/supabase";
 
 export type ChartViewMode = 'monthly' | 'yearly';
 
@@ -12,53 +8,115 @@ export type TableSortSettings = {
     direction: 'asc' | 'desc';
 };
 
-export interface NotificationSettings {
-    enabled: boolean;
-    reminderDays: number;
-}
-
 // Helper functions to load and save settings
-export function loadChartViewMode(): ChartViewMode {
-    const state = loadAppState();
-    return state.settings.chartViewMode;
+export async function loadChartViewMode(): Promise<ChartViewMode> {
+    // Get current user
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Load state from Supabase if user is logged in, otherwise from local storage
+    const state = user ? await loadAppStateAsync(user.id) : loadAppState();
+    return state.settings.chart_view_mode || 'monthly';
 }
 
-export function saveChartViewMode(mode: ChartViewMode) {
+export async function saveChartViewMode(mode: ChartViewMode) {
     const state = loadAppState();
-    state.settings.chartViewMode = mode;
+    state.settings.chart_view_mode = mode;
     saveAppState(state);
+
+    // Get current user
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+        // Also save to Supabase if user is logged in
+        await saveAppStateAsync(state, user.id);
+    }
 }
 
-export function loadTableSortSettings(): TableSortSettings | null {
-    const state = loadAppState();
-    return state.settings.tableSortSettings;
+export async function loadTableSortSettings(): Promise<TableSortSettings | null> {
+    // Get current user
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Load state from Supabase if user is logged in, otherwise from local storage
+    const state = user ? await loadAppStateAsync(user.id) : loadAppState();
+    if (!state.settings.table_sort_settings_column || !state.settings.table_sort_settings_direction) {
+        return null;
+    }
+    return {
+        column: state.settings.table_sort_settings_column,
+        direction: state.settings.table_sort_settings_direction
+    };
 }
 
-export function saveTableSortSettings(settings: TableSortSettings) {
+export async function saveTableSortSettings(settings: TableSortSettings | null) {
     const state = loadAppState();
-    state.settings.tableSortSettings = settings;
+    if (settings) {
+        state.settings.table_sort_settings_column = settings.column;
+        state.settings.table_sort_settings_direction = settings.direction;
+    } else {
+        state.settings.table_sort_settings_column = null;
+        state.settings.table_sort_settings_direction = null;
+    }
     saveAppState(state);
+
+    // Get current user
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+        // Also save to Supabase if user is logged in
+        await saveAppStateAsync(state, user.id);
+    }
 }
 
-export function loadPrimaryCurrency(): string {
-    const state = loadAppState();
-    return state.settings.primaryCurrency;
+export async function loadPrimaryCurrency(): Promise<string> {
+    // Get current user
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Load state from Supabase if user is logged in, otherwise from local storage
+    const state = user ? await loadAppStateAsync(user.id) : loadAppState();
+    return state.settings.primary_currency;
 }
 
-export function savePrimaryCurrency(currency: string) {
+export async function savePrimaryCurrency(currency: string) {
     const state = loadAppState();
-    state.settings.primaryCurrency = currency;
+    state.settings.primary_currency = currency;
     saveAppState(state);
+
+    // Get current user
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+        // Also save to Supabase if user is logged in
+        await saveAppStateAsync(state, user.id);
+    }
 }
 
-// Notification settings - preserved for future implementation
-export function loadNotificationSettings(): NotificationSettings {
-    const state = loadAppState();
-    return state.settings.notifications || { enabled: false, reminderDays: 1 };
+export async function loadNotificationSettings() {
+    // Get current user
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Load state from Supabase if user is logged in, otherwise from local storage
+    const state = user ? await loadAppStateAsync(user.id) : loadAppState();
+    return {
+        enabled: state.settings.notifications_enabled,
+        reminderDays: state.settings.notifications_reminder_days
+    };
 }
 
-export function saveNotificationSettings(settings: NotificationSettings) {
+export async function saveNotificationSettings(settings: { enabled: boolean; reminderDays: number }) {
     const state = loadAppState();
-    state.settings.notifications = settings;
+    state.settings.notifications_enabled = settings.enabled;
+    state.settings.notifications_reminder_days = settings.reminderDays;
     saveAppState(state);
+
+    // Get current user
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+        // Also save to Supabase if user is logged in
+        await saveAppStateAsync(state, user.id);
+    }
 }

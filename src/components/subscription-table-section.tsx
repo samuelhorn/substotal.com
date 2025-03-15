@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { SubscriptionTable } from "@/components/subscription-table";
 import { SubscriptionFormDialog } from "@/components/subscription-form-dialog";
-import { useSubscriptions } from "@/components/subscription-context";
-import { useCurrency } from "@/components/currency-context";
+import { useSubscriptions, useCurrency } from "@/components/app-provider";
 import { Subscription } from "@/lib/subscriptions";
 
 export function SubscriptionTableSection() {

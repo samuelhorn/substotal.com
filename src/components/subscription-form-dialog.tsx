@@ -41,7 +41,7 @@ import {
 } from "@/components/ui/popover";
 
 import { Subscription, subscriptionSchema } from "@/lib/subscriptions";
-import { loadPrimaryCurrency } from "@/lib/settings";
+import { useCurrency } from "./app-provider";
 import { CURRENCIES } from '@/lib/currencies'
 
 const CATEGORIES = [
@@ -79,6 +79,7 @@ export function SubscriptionFormDialog({
     className,
 }: SubscriptionFormDialogProps) {
     const [internalOpen, setInternalOpen] = useState(false);
+    const { primaryCurrency, isLoading } = useCurrency();
 
     // If in controlled mode, use external state
     const isControlled = externalOpen !== undefined && externalOnOpenChange !== undefined;
@@ -91,6 +92,12 @@ export function SubscriptionFormDialog({
         ? "Edit your subscription details."
         : "Add a new subscription to track.";
 
+
+    useEffect(() => {
+        form.setValue("currency", primaryCurrency);
+    }, [primaryCurrency]);
+
+
     const form = useForm<Subscription>({
         resolver: zodResolver(subscriptionSchema),
         defaultValues: {
@@ -98,10 +105,10 @@ export function SubscriptionFormDialog({
             name: subscription?.name || "",
             amount: subscription?.amount || 0,
             frequency: subscription?.frequency || "monthly",
-            startDate: subscription?.startDate || format(new Date(), "yyyy-MM-dd"),
-            commitmentEndDate: subscription?.commitmentEndDate,
+            start_date: subscription?.start_date || format(new Date(), "yyyy-MM-dd"),
+            commitment_end_date: subscription?.commitment_end_date,
             category: subscription?.category || "Other",
-            currency: subscription?.currency || loadPrimaryCurrency() || "USD",
+            currency: subscription?.currency || primaryCurrency || "USD",
             url: subscription?.url || null,
         },
     });
@@ -114,15 +121,28 @@ export function SubscriptionFormDialog({
     }, [subscription, form]);
 
     function handleSubmit(values: Subscription) {
-        onSubmit(values);
+        const newSubscription: Subscription = {
+            id: subscription?.id || `sub_${Date.now()}`,
+            name: values.name,
+            amount: Number(values.amount),
+            frequency: values.frequency,
+            start_date: values.start_date,
+            commitment_end_date: values.commitment_end_date,
+            category: values.category,
+            currency: values.currency,
+            url: values.url || null,
+            hidden: false
+        };
+
+        onSubmit(newSubscription);
         if (!isEditing) {
             form.reset({
                 id: uuidv4(),
                 name: "",
                 amount: 0,
                 frequency: "monthly",
-                startDate: format(new Date(), "yyyy-MM-dd"),
-                commitmentEndDate: undefined,
+                start_date: format(new Date(), "yyyy-MM-dd"),
+                commitment_end_date: undefined,
                 category: "Other",
                 currency: "USD",
                 url: "",
@@ -281,7 +301,7 @@ export function SubscriptionFormDialog({
 
                 <FormField
                     control={form.control}
-                    name="startDate"
+                    name="start_date"
                     render={({ field }) => (
                         <FormItem className="flex flex-col items-stretch">
                             <FormLabel>Start Date</FormLabel>
@@ -317,7 +337,7 @@ export function SubscriptionFormDialog({
 
                 <FormField
                     control={form.control}
-                    name="commitmentEndDate"
+                    name="commitment_end_date"
                     render={({ field }) => (
                         <FormItem className="flex flex-col">
                             <FormLabel>Commitment End Date (Optional)</FormLabel>

@@ -31,8 +31,8 @@ import {
 import { Subscription, calculateMonthlyCost, calculateYearlyCost } from "@/lib/subscriptions";
 import { convertAmount } from "@/lib/currency";
 import { formatCurrency } from "@/lib/utils";
-import { loadTableSortSettings, saveTableSortSettings } from '@/lib/settings';
 import { Skeleton } from "./ui/skeleton";
+import { useTableSort } from "./app-provider";
 
 interface SubscriptionTableProps {
     subscriptions: Subscription[];
@@ -44,8 +44,7 @@ interface SubscriptionTableProps {
     isLoading: boolean;
 }
 
-type SortColumn = "name" | "amount" | "frequency" | "category" | "startDate";
-type SortDirection = "asc" | "desc";
+type SortColumn = "name" | "amount" | "frequency" | "category" | "startDate" | "monthly" | "yearly" | "visibility";
 
 function getFaviconUrl(url: string | undefined) {
     if (!url) return null;
@@ -66,15 +65,7 @@ export function SubscriptionTable({
     exchangeRates,
     isLoading
 }: SubscriptionTableProps) {
-    // Initialize sort state from localStorage
-    const [sortColumn, setSortColumn] = useState<SortColumn>(() => {
-        const savedSettings = loadTableSortSettings();
-        return (savedSettings?.column as SortColumn) || "name";
-    });
-    const [sortDirection, setSortDirection] = useState<SortDirection>(() => {
-        const savedSettings = loadTableSortSettings();
-        return (savedSettings?.direction as SortDirection) || "asc";
-    });
+    const { tableSortSettings, setTableSortSettings } = useTableSort();
 
     const [isClient, setIsClient] = useState(false);
 
@@ -83,26 +74,20 @@ export function SubscriptionTable({
         setIsClient(true);
     }, []);
 
-    // Save sort settings whenever they change
-    useEffect(() => {
-        saveTableSortSettings({ column: sortColumn, direction: sortDirection });
-    }, [sortColumn, sortDirection]);
-
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [subscriptionToDelete, setSubscriptionToDelete] = useState<Subscription | null>(null);
 
     const handleSort = (column: SortColumn) => {
-        if (sortColumn === column) {
-            setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+        if (tableSortSettings?.column === column) {
+            setTableSortSettings({ column, direction: tableSortSettings.direction === "asc" ? "desc" : "asc" });
         } else {
-            setSortColumn(column);
-            setSortDirection("asc");
+            setTableSortSettings({ column, direction: "asc" });
         }
     };
 
     const sortedSubscriptions = [...subscriptions].sort((a, b) => {
-        const direction = sortDirection === "asc" ? 1 : -1;
-        switch (sortColumn) {
+        const direction = tableSortSettings?.direction === "asc" ? 1 : -1;
+        switch (tableSortSettings?.column) {
             case "name":
                 return a.name.localeCompare(b.name) * direction;
             case "amount":
@@ -112,7 +97,13 @@ export function SubscriptionTable({
             case "category":
                 return a.category.localeCompare(b.category) * direction;
             case "startDate":
-                return (new Date(a.startDate).getTime() - new Date(b.startDate).getTime()) * direction;
+                return (new Date(a.start_date).getTime() - new Date(b.start_date).getTime()) * direction;
+            case "monthly":
+                return (calculateMonthlyCost(a) - calculateMonthlyCost(b)) * direction;
+            case "yearly":
+                return (calculateYearlyCost(a) - calculateYearlyCost(b)) * direction;
+            case "visibility":
+                return (a.hidden ? 1 : 0) - (b.hidden ? 1 : 0) * direction;
             default:
                 return 0;
         }
@@ -156,8 +147,8 @@ export function SubscriptionTable({
     };
 
     const getSortIcon = (column: SortColumn) => {
-        if (sortColumn !== column || !isClient) return null;
-        return sortDirection === "asc" ? "↑" : "↓";
+        if (tableSortSettings?.column !== column || !isClient) return null;
+        return tableSortSettings.direction === "asc" ? "↑" : "↓";
     };
 
     const handleToggleHidden = (subscription: Subscription) => {
@@ -169,34 +160,30 @@ export function SubscriptionTable({
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>
-                            <div onClick={() => handleSort("name")} className="cursor-pointer">
-                                Name {getSortIcon("name")}
-                            </div>
+                        <TableHead onClick={() => handleSort("name")}>
+                            Name {getSortIcon("name")}
                         </TableHead>
-                        <TableHead>
-                            <div onClick={() => handleSort("amount")} className="cursor-pointer">
-                                Amount {getSortIcon("amount")}
-                            </div>
+                        <TableHead onClick={() => handleSort("amount")}>
+                            Amount {getSortIcon("amount")}
                         </TableHead>
-                        <TableHead>
-                            <div onClick={() => handleSort("frequency")} className="cursor-pointer">
-                                Frequency {getSortIcon("frequency")}
-                            </div>
+                        <TableHead onClick={() => handleSort("frequency")}>
+                            Frequency {getSortIcon("frequency")}
                         </TableHead>
-                        <TableHead>
-                            <div onClick={() => handleSort("category")} className="cursor-pointer">
-                                Category {getSortIcon("category")}
-                            </div>
+                        <TableHead onClick={() => handleSort("category")}>
+                            Category {getSortIcon("category")}
                         </TableHead>
-                        <TableHead>
-                            <div onClick={() => handleSort("startDate")} className="cursor-pointer">
-                                Start Date {getSortIcon("startDate")}
-                            </div>
+                        <TableHead onClick={() => handleSort("startDate")}>
+                            Start Date {getSortIcon("startDate")}
                         </TableHead>
-                        <TableHead>Monthly Cost</TableHead>
-                        <TableHead>Yearly Cost</TableHead>
-                        <TableHead className="text-center">Visibility</TableHead>
+                        <TableHead onClick={() => handleSort("monthly")}>
+                            Monthly Cost {getSortIcon("monthly")}
+                        </TableHead>
+                        <TableHead onClick={() => handleSort("yearly")}>
+                            Yearly Cost {getSortIcon("yearly")}
+                        </TableHead>
+                        <TableHead onClick={() => handleSort("visibility")} className="text-center">
+                            Visibility {getSortIcon("visibility")}
+                        </TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -211,108 +198,110 @@ export function SubscriptionTable({
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            sortedSubscriptions.map((subscription) => (
-                                <TableRow
-                                    key={subscription.id}
-                                    className={subscription.hidden ? "opacity-50" : ""}
-                                >
-                                    <TableCell>
-                                        <div className="flex items-center gap-4">
-                                            {subscription.url ? (
-                                                <div className="relative w-5 h-5">
-                                                    <Image
-                                                        src={getFaviconUrl(subscription.url) || '/globe.svg'}
-                                                        alt={`${subscription.name} favicon`}
-                                                        className="rounded-sm"
-                                                        width={20}
-                                                        height={20}
-                                                        onError={(e) => {
-                                                            const img = e.target as HTMLImageElement;
-                                                            img.src = '/globe.svg';
-                                                        }}
-                                                    />
-                                                </div>
-                                            ) : (
-                                                <Globe className="w-4 h-4 text-muted-foreground" />
-                                            )}
-                                            {subscription.url ? (
-                                                <a
-                                                    href={subscription.url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="hover:underline"
-                                                >
-                                                    {subscription.name}
-                                                </a>
-                                            ) : (
-                                                subscription.name
-                                            )}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>{formatAmountDisplay(subscription.amount, subscription.currency)}</TableCell>
-                                    <TableCell className="capitalize">{subscription.frequency}</TableCell>
-                                    <TableCell>{subscription.category}</TableCell>
-                                    <TableCell>{format(new Date(subscription.startDate), "MMM d, yyyy")}</TableCell>
-                                    <TableCell>
-                                        {formatAmountDisplay(
-                                            calculateMonthlyCost(subscription),
-                                            subscription.currency
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        {formatAmountDisplay(
-                                            calculateYearlyCost(subscription),
-                                            subscription.currency
-                                        )}
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        <div className="flex items-center justify-center gap-2">
-                                            <Button
-                                                variant="ghost"
-                                                className="p-1"
-                                                onClick={() => handleToggleHidden(subscription)}
-                                            >
-                                                {subscription.hidden ? (
-                                                    <EyeOff className="h-4 w-4 text-foreground" />
-                                                ) : (
-                                                    <Eye className="h-4 w-4 text-foreground" />
-                                                )}
-                                            </Button>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex justify-end">
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <Button variant="ghost" size="icon">
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                    </Button>
-                                                </PopoverTrigger>
-                                                <PopoverContent className="w-40" align="end">
-                                                    <div className="flex flex-col space-y-1">
-                                                        <Button
-                                                            variant="ghost"
-                                                            className="justify-start"
-                                                            onClick={() => handleEditClick(subscription)}
-                                                        >
-                                                            <Pencil className="mr-2 h-4 w-4" />
-                                                            Edit
-                                                        </Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            className="justify-start text-destructive-foreground"
-                                                            onClick={() => handleDeleteClick(subscription)}
-                                                        >
-                                                            <Trash2 className="mr-2 h-4 w-4" />
-                                                            Delete
-                                                        </Button>
+                            sortedSubscriptions.map((subscription) => {
+                                return (
+                                    <TableRow
+                                        key={subscription.id}
+                                        className={subscription.hidden ? "opacity-50" : ""}
+                                    >
+                                        <TableCell>
+                                            <div className="flex items-center gap-4">
+                                                {subscription.url ? (
+                                                    <div className="relative w-5 h-5">
+                                                        <Image
+                                                            src={getFaviconUrl(subscription.url) || '/globe.svg'}
+                                                            alt={`${subscription.name} favicon`}
+                                                            className="rounded-sm"
+                                                            width={20}
+                                                            height={20}
+                                                            onError={(e) => {
+                                                                const img = e.target as HTMLImageElement;
+                                                                img.src = '/globe.svg';
+                                                            }}
+                                                        />
                                                     </div>
-                                                </PopoverContent>
-                                            </Popover>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            ))
+                                                ) : (
+                                                    <Globe className="w-4 h-4 text-muted-foreground" />
+                                                )}
+                                                {subscription.url ? (
+                                                    <a
+                                                        href={subscription.url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="hover:underline"
+                                                    >
+                                                        {subscription.name}
+                                                    </a>
+                                                ) : (
+                                                    subscription.name
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>{formatAmountDisplay(subscription.amount, subscription.currency)}</TableCell>
+                                        <TableCell className="capitalize">{subscription.frequency}</TableCell>
+                                        <TableCell>{subscription.category}</TableCell>
+                                        <TableCell>{format(new Date(subscription.start_date), "MMM d, yyyy")}</TableCell>
+                                        <TableCell>
+                                            {formatAmountDisplay(
+                                                calculateMonthlyCost(subscription),
+                                                subscription.currency
+                                            )}
+                                        </TableCell>
+                                        <TableCell>
+                                            {formatAmountDisplay(
+                                                calculateYearlyCost(subscription),
+                                                subscription.currency
+                                            )}
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            <div className="flex items-center justify-center gap-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    className="p-1"
+                                                    onClick={() => handleToggleHidden(subscription)}
+                                                >
+                                                    {subscription.hidden ? (
+                                                        <EyeOff className="h-4 w-4 text-foreground" />
+                                                    ) : (
+                                                        <Eye className="h-4 w-4 text-foreground" />
+                                                    )}
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex justify-end">
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <Button variant="ghost" size="icon">
+                                                            <MoreHorizontal className="h-4 w-4" />
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-40" align="end">
+                                                        <div className="flex flex-col space-y-1">
+                                                            <Button
+                                                                variant="ghost"
+                                                                className="justify-start"
+                                                                onClick={() => handleEditClick(subscription)}
+                                                            >
+                                                                <Pencil className="mr-2 h-4 w-4" />
+                                                                Edit
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                className="justify-start text-destructive-foreground"
+                                                                onClick={() => handleDeleteClick(subscription)}
+                                                            >
+                                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                                Delete
+                                                            </Button>
+                                                        </div>
+                                                    </PopoverContent>
+                                                </Popover>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            })
                         )
                     )}
                 </TableBody>

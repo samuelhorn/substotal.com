@@ -2,8 +2,7 @@
 
 import { CategoryBreakdownChart } from "@/components/category-breakdown-chart";
 import { UpcomingPaymentsChart } from "@/components/upcoming-payments-chart";
-import { useSubscriptions } from "@/components/subscription-context";
-import { useCurrency } from "@/components/currency-context";
+import { useSubscriptions, useCurrency } from "@/components/app-provider";
 
 export function SubscriptionChartsSection() {
     const { subscriptions } = useSubscriptions();

@@ -8,8 +8,8 @@ export const subscriptionSchema = z.object({
     name: z.string().min(1, "Name is required"),
     amount: z.number().positive("Amount must be positive"),
     frequency: z.enum(["monthly", "yearly"]),
-    startDate: z.string(),
-    commitmentEndDate: z.string().optional(),
+    start_date: z.string(),
+    commitment_end_date: z.string().optional(),
     category: z.string(),
     currency: z.string().default("USD"),
     url: z.string().url("Invalid URL").optional().nullable(),
@@ -18,6 +18,28 @@ export const subscriptionSchema = z.object({
 
 // Define the Subscription type
 export type Subscription = z.infer<typeof subscriptionSchema>;
+
+// Function to validate subscription data
+export function validateSubscription(subscription: any): Subscription {
+    try {
+        return subscriptionSchema.parse({
+            ...subscription,
+            // Ensure numeric fields are properly typed
+            amount: Number(subscription.amount),
+            // Ensure boolean fields are properly typed
+            hidden: Boolean(subscription.hidden),
+            // Ensure optional fields are properly handled
+            url: subscription.url || null,
+            commitment_end_date: subscription.commitment_end_date || undefined
+        });
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            const issues = error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`).join(', ');
+            throw new Error(`Invalid subscription data: ${issues}`);
+        }
+        throw error;
+    }
+}
 
 // Function to load subscriptions from storage
 export function loadSubscriptions(): Subscription[] {
@@ -56,7 +78,7 @@ export function generateTestData(): Subscription[] {
             name: "PlayStation Plus Extra",
             amount: 14.99,
             frequency: "monthly",
-            startDate: tomorrow.toISOString(),
+            start_date: tomorrow.toISOString(),
             category: "Gaming",
             currency: "USD",
             url: "https://playstation.com",
@@ -67,7 +89,7 @@ export function generateTestData(): Subscription[] {
             name: "Spotify Premium",
             amount: 9.99,
             frequency: "monthly",
-            startDate: inTwoDays.toISOString(),
+            start_date: inTwoDays.toISOString(),
             category: "Music",
             currency: "USD",
             url: "https://spotify.com",
@@ -78,7 +100,7 @@ export function generateTestData(): Subscription[] {
             name: "Slack Pro",
             amount: 150,
             frequency: "yearly",
-            startDate: inFiveDays.toISOString(),
+            start_date: inFiveDays.toISOString(),
             category: "Productivity",
             currency: "USD",
             url: "https://slack.com",
@@ -173,12 +195,12 @@ export function calculateLockedInCost(subscriptions: Subscription[], targetCurre
 
     return filterHiddenSubscriptions(subscriptions)
         .filter(sub => {
-            if (!sub.commitmentEndDate) return false;
-            const endDate = new Date(sub.commitmentEndDate);
+            if (!sub.commitment_end_date) return false;
+            const endDate = new Date(sub.commitment_end_date);
             return endDate > today;
         })
         .reduce((total, sub) => {
-            const endDate = new Date(sub.commitmentEndDate!);
+            const endDate = new Date(sub.commitment_end_date!);
             const monthsLeft = (endDate.getFullYear() - today.getFullYear()) * 12 +
                 (endDate.getMonth() - today.getMonth());
 
@@ -228,7 +250,7 @@ export function getUpcomingPayments(subscriptions: Subscription[], days: number 
     const payments: { date: Date; subscription: Subscription; amount: number }[] = [];
 
     filterHiddenSubscriptions(subscriptions).forEach(sub => {
-        const startDate = new Date(sub.startDate);
+        const startDate = new Date(sub.start_date);
         const nextPayment = new Date(startDate);
 
         // Find the next payment date after today
