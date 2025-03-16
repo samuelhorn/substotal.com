@@ -1,8 +1,5 @@
 import { signOutAction } from "@/app/actions";
 import Link from "next/link";
-import { DashboardButton } from "@/components/dashboard-button";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { SettingsDialog } from "@/components/settings-dialog";
 import { createClient } from "@/lib/supabase/server";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { CloudIcon, CloudOffIcon, UserIcon, Settings, LogOut, LogIn, UserPlus, HelpCircle } from "lucide-react";
@@ -10,27 +7,13 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { HeaderAuthShared } from "@/components/header-auth-shared";
 
-
-function SharedItems() {
-    return (
-        <DropdownMenuGroup>
-            <DashboardButton />
-            <DropdownMenuItem>
-                <SettingsDialog />
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-                <ThemeToggle />
-            </DropdownMenuItem>
-        </DropdownMenuGroup>
-    );
-}
 
 export async function AuthButton() {
     const supabase = await createClient();
@@ -56,7 +39,7 @@ export async function AuthButton() {
                             </div>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <SharedItems />
+                        <HeaderAuthShared />
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
                             <form action={signOutAction} className="w-full">
@@ -102,7 +85,7 @@ export async function AuthButton() {
                             </div>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <SharedItems />
+                        <HeaderAuthShared />
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
                             <Link href="/sign-in" className="flex gap-2 items-center">

@@ -14,7 +14,7 @@ export function DashboardButton() {
     }
 
     return (
-        <DropdownMenuItem>
+        <DropdownMenuItem asChild>
             <Link href="/subscriptions" className="block gap-2 flex items-center w-full">
                 <LayoutDashboard className="w-5 h-5" />
                 <span className="sr-only sm:not-sr-only">Dashboard</span>
