@@ -11,9 +11,16 @@ import {
 import ReactCountryFlag from "react-country-flag"
 import { useCurrency } from '@/components/app-provider'
 import { Skeleton } from './ui/skeleton'
+import { usePathname } from "next/navigation";
 
 export function CurrencySelect() {
+    const pathname = usePathname();
+    const isSubscriptionsPage = pathname === "/subscriptions";
     const { primaryCurrency, setPrimaryCurrency, isLoading } = useCurrency();
+
+    if (!isSubscriptionsPage) {
+        return null;
+    }
 
     return (
         <div className="flex items-center gap-2">

@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AppState } from "@/lib/storage";
 import { Subscription } from "@/lib/subscriptions";
+import { revalidatePath } from "next/cache";
 
 export const signUpAction = async (formData: FormData) => {
     const email = formData.get("email")?.toString();

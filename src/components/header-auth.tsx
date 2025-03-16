@@ -1,9 +1,36 @@
 import { signOutAction } from "@/app/actions";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { DashboardButton } from "@/components/dashboard-button";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { SettingsDialog } from "@/components/settings-dialog";
 import { createClient } from "@/lib/supabase/server";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { CloudIcon, UserIcon } from "lucide-react";
+import { CloudIcon, CloudOffIcon, UserIcon, Settings, LogOut, LogIn, UserPlus, HelpCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+
+function SharedItems() {
+    return (
+        <DropdownMenuGroup>
+            <DashboardButton />
+            <DropdownMenuItem>
+                <SettingsDialog />
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+                <ThemeToggle />
+            </DropdownMenuItem>
+        </DropdownMenuGroup>
+    );
+}
 
 export async function AuthButton() {
     const supabase = await createClient();
@@ -11,38 +38,98 @@ export async function AuthButton() {
 
     return user ? (
         <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-                <Avatar className="h-8 w-8">
-                    <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <div className="flex items-center gap-1 text-sm">
-                    <CloudIcon className="h-4 w-4 text-primary" />
-                    <span className="text-muted-foreground">Cloud storage</span>
+            <div className="relative">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Avatar className="h-8 w-8 cursor-pointer">
+                            <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="min-w-64">
+                        <DropdownMenuLabel>
+                            <div className="flex items-center gap-2 justify-between">
+                                <div>
+                                    <div>{user.email}</div>
+                                    <div className="text-muted-foreground">Using cloud storage</div>
+                                </div>
+                                <CloudIcon className="h-7 w-7 text-muted-foreground" />
+                            </div>
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <SharedItems />
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                            <form action={signOutAction} className="w-full">
+                                <button type="submit" className="flex w-full items-center">
+                                    <LogOut className="mr-2 h-5 w-5" />
+                                    <span>Sign out</span>
+                                </button>
+                            </form>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+                <div className="absolute -top-2 -right-2">
+                    <Tooltip>
+                        <TooltipTrigger>
+                            <div className="rounded-full p-0.5 bg-green-500 border shadow-md">
+                                <CloudIcon className="h-4 w-4 text-green-900" />
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            You are using Cloud storage
+                        </TooltipContent>
+                    </Tooltip>
                 </div>
             </div>
-            <form action={signOutAction}>
-                <Button type="submit" variant="outline" size="sm">
-                    Sign out
-                </Button>
-            </form>
         </div>
     ) : (
         <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-                <Avatar className="h-8 w-8 opacity-50">
-                    <AvatarFallback><UserIcon className="h-4 w-4" /></AvatarFallback>
-                </Avatar>
-                <div className="flex items-center gap-1 text-sm">
-                    <span className="text-muted-foreground">Local storage</span>
+            <div className="relative">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Avatar className="h-8 w-8 opacity-50 cursor-pointer">
+                            <AvatarFallback><UserIcon className="h-4 w-4" /></AvatarFallback>
+                        </Avatar>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="min-w-64">
+                        <DropdownMenuLabel>
+                            <div className="flex items-center gap-2 justify-between">
+                                <div>
+                                    <div>Not signed in</div>
+                                    <div className="text-muted-foreground">Using local storage</div>
+                                </div>
+                                <CloudOffIcon className="h-7 w-7 text-muted-foreground  " />
+                            </div>
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <SharedItems />
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                            <Link href="/sign-in" className="flex gap-2 items-center">
+                                <LogIn className="h-4 w-4" />
+                                <span>Sign in</span>
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link href="/sign-up" className="flex gap-2 items-center">
+                                <UserPlus className="h-4 w-4" />
+                                <span>Sign up</span>
+                            </Link>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+                <div className="absolute -top-2 -right-2">
+                    <Tooltip>
+                        <TooltipTrigger>
+                            <div className="rounded-full p-0.5 bg-red-500 border shadow-md">
+                                <CloudOffIcon className="h-4 w-4 text-red-900" />
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            You are using Local storage
+                        </TooltipContent>
+                    </Tooltip>
                 </div>
-            </div>
-            <div className="flex gap-2">
-                <Button asChild size="sm" variant="outline">
-                    <Link href="/sign-in">Sign in</Link>
-                </Button>
-                <Button asChild size="sm" variant="default">
-                    <Link href="/sign-up">Sign up</Link>
-                </Button>
             </div>
         </div>
     );

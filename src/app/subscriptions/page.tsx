@@ -5,6 +5,7 @@ import { SubscriptionTableSection } from "@/components/subscription-table-sectio
 import { WelcomeModal } from "@/components/welcome-modal";
 import { createClient } from "@/lib/supabase/server";
 import { AuthRedirect } from "@/components/auth-redirect";
+import { revalidatePath } from "next/cache";
 
 const metaTitle = "Your Subscriptions | Substotal";
 const metaDescription = "Manage and track all your subscription expenses in one place with SubTrack.";

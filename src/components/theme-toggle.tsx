@@ -20,13 +20,15 @@ export function ThemeToggle() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                    <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                    <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                    <span className="sr-only">Toggle theme</span>
-                </Button>
+                <div className="flex gap-2 items-center">
+                    <div className="relative">
+                        <Sun className="w-5 h-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                        <Moon className="absolute top-0 w-5 h-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                    </div>
+                    <span>Toggle theme</span>
+                </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="min-w-40">
                 <DropdownMenuItem onClick={() => setTheme("light")} className={cn("flex justify-between items-center", {
                     "bg-accent": theme === "light"
                 })}>
@@ -46,6 +48,6 @@ export function ThemeToggle() {
                     {theme === "system" && <CheckIcon className="size-4" />}
                 </DropdownMenuItem>
             </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu >
     )
 }

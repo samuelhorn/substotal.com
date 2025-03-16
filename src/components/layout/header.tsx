@@ -1,7 +1,4 @@
-import { ThemeToggle } from "@/components/theme-toggle";
-import { SettingsDialog } from "@/components/settings-dialog";
 import { CurrencySelect } from "@/components/currency-select";
-import { DashboardButton } from "@/components/dashboard-button";
 import Link from "next/link";
 
 import { AuthButton } from "@/components/header-auth";
@@ -20,12 +17,9 @@ export function Header({
                 substotal
             </Link>
             <div className="flex items-center gap-2">
-                <ThemeToggle />
-                <SettingsDialog />
                 {showCurrencySelect && (
                     <CurrencySelect />
                 )}
-                <DashboardButton />
                 <AuthButton />
             </div>
         </header>
