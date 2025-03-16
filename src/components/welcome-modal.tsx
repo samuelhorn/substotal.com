@@ -10,8 +10,9 @@ import { useSubscriptions } from './app-provider'
 import { createClient } from '@/lib/supabase/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { CloudIcon, CloudOff } from 'lucide-react'
+import { CloudIcon, CloudOffIcon } from 'lucide-react'
 import { url } from 'inspector'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 
 // Track whether the user has previously logged in
 const HAS_LOGGED_IN_BEFORE = 'subtrack_has_logged_in_before';
@@ -74,12 +75,10 @@ export function WelcomeModal() {
 
                     if (hasLocalData) {
                         setIsOpen(false);
-                        // Show cloud dialog if they've logged in before
-                        setShowCloudDialog(userLoggedInBefore);
                     } else {
                         // No local data - if they've logged in before, redirect to sign-in
                         if (userLoggedInBefore) {
-                            router.push('/sign-in');
+                            setShowCloudDialog(userLoggedInBefore);
                             return;
                         }
                         // New user with no data - show welcome modal
@@ -93,7 +92,7 @@ export function WelcomeModal() {
                 const localData = loadAppState();
                 const hasLocalData = localData.subscriptions.length > 0;
                 if (!hasLocalData && hasLoggedInBefore()) {
-                    router.push('/sign-in');
+                    // router.push('/sign-in');
                     return;
                 }
                 setIsOpen(!hasLocalData);
@@ -161,16 +160,6 @@ export function WelcomeModal() {
         window.location.reload();
     };
 
-    // Handler for removing local data and redirecting to sign-in
-    const handleRemoveLocalData = () => {
-        clearAppState();
-        toast.success('Local data removed. Redirecting to sign-in...');
-        // Short timeout to allow the toast to be visible
-        setTimeout(() => {
-            router.push('/sign-in');
-        }, 1500);
-    }
-
     if (isLoading) {
         return null // Don't show anything while checking data
     }
@@ -214,49 +203,29 @@ export function WelcomeModal() {
                     onSubmit={handleAddSubscription}
                 />
             )}
-
             <Dialog open={showCloudDialog} onOpenChange={setShowCloudDialog}>
-                <DialogContent className="sm:max-w-[500px]">
+                <DialogContent>
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2 text-2xl">
-                            <CloudIcon className="h-6 w-6 text-primary" />
                             Welcome Back!
                         </DialogTitle>
                         <DialogDescription className="space-y-4 pt-2">
-
+                            We noticed you've previously used cloud storage. If you would you like to
+                            access your existing subscriptions and continue where you left off, you can sign in to below.
                         </DialogDescription>
                     </DialogHeader>
-                    <DialogContent>
-                        <div className="text-lg">
-                            We noticed you've previously used cloud storage. Would you like to:
-                        </div>
-                        <div className="grid gap-4">
-                            <div className="flex items-start gap-3 rounded-lg border p-4">
-                                <CloudIcon className="h-5 w-5 text-primary mt-0.5" />
-                                <div>
-                                    <h3 className="font-medium mb-1">Sign in to access your cloud data</h3>
-                                    <p className="text-muted-foreground text-sm">Access your existing subscriptions and continue where you left off.</p>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-3 rounded-lg border p-4">
-                                <CloudOff className="h-5 w-5 text-muted-foreground mt-0.5" />
-                                <div>
-                                    <h3 className="font-medium mb-1">Continue with local storage</h3>
-                                    <p className="text-muted-foreground text-sm">Start fresh with local-only storage. You can always sign in later to move to cloud storage.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </DialogContent>
-                    <div className="flex flex-col gap-3">
-                        <Button size="lg" onClick={() => router.push('/sign-in')}>
-                            Sign in to Cloud Storage
-                        </Button>
-                        <Button variant="outline" size="lg" onClick={() => setShowCloudDialog(false)}>
+                    <DialogFooter className='mt-4'>
+                        <Button size="sm" variant="outline" onClick={() => setShowCloudDialog(false)}>
+                            <CloudOffIcon />
                             Continue Locally
                         </Button>
-                    </div>
+                        <Button size="sm" onClick={() => router.push('/sign-in')}>
+                            <CloudIcon />
+                            Sign in to Cloud Storage
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
-            </Dialog>
+            </Dialog >
         </>
     )
 }

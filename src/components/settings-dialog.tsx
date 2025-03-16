@@ -70,7 +70,7 @@ export function SettingsDialog() {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full">
                     <Settings className="w-5 h-5" />
                     <span>Settings</span>
                 </div>

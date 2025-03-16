@@ -11,7 +11,7 @@ export function AuthRedirect() {
         // Only redirect to sign in if user has completed migration before
         // This means they had previously logged in and synced their data
         if (hasMigrationCompleted()) {
-            router.push('/sign-in');
+            // router.push('/sign-in');
         }
     }, [router]);
 

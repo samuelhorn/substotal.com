@@ -6,7 +6,6 @@ import { useTheme } from "next-themes"
 import { CheckIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -20,7 +19,7 @@ export function ThemeToggle() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <div className="flex gap-2 items-center">
+                <div className="flex gap-2 items-center w-full">
                     <div className="relative">
                         <Sun className="w-5 h-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                         <Moon className="absolute top-0 w-5 h-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
@@ -28,7 +27,7 @@ export function ThemeToggle() {
                     <span>Toggle theme</span>
                 </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-40">
+            <DropdownMenuContent align="start" className="min-w-40">
                 <DropdownMenuItem onClick={() => setTheme("light")} className={cn("flex justify-between items-center", {
                     "bg-accent": theme === "light"
                 })}>
