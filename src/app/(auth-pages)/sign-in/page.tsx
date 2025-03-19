@@ -10,6 +10,7 @@ import Link from "next/link";
 export default async function Login(props: { searchParams: Promise<Message> }) {
     // Extract message data from searchParams in a serializable way
     const searchParams = await props.searchParams;
+
     const message = searchParams && 'message' in searchParams
         ? {
             type: searchParams?.type === 'success' ? 'success' as const : 'error' as const,
