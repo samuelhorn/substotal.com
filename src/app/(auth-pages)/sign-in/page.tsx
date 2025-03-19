@@ -10,12 +10,13 @@ import Link from "next/link";
 type SearchParamsType = Record<string, string | string[] | undefined>;
 
 export default function Login({
-    searchParams = {}
+    searchParams = {} as SearchParamsType
 }: {
-    searchParams?: SearchParamsType | any
+    searchParams?: SearchParamsType
 }) {
     // Extract message data from searchParams in a serializable way
-    const message = typeof searchParams === 'object' && searchParams && 'message' in searchParams
+    // Since we provide a default value above, searchParams will never be undefined
+    const message = 'message' in searchParams
         ? {
             type: searchParams.type === 'success' ? 'success' as const : 'error' as const,
             message: String(searchParams.message)
