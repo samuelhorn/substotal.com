@@ -1,5 +1,5 @@
 import { signInAction } from "@/app/actions";
-import { FormMessage } from "@/components/form-message";
+import { FormMessage, Message } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,12 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Link from "next/link";
 
 // Standard Next.js App Router page component
-export default function Login({
-    searchParams,
-}: {
-    searchParams?: { [key: string]: string | string[] | undefined };
-}) {
+export default async function Login(props: { searchParams: Promise<Message> }) {
     // Extract message data from searchParams in a serializable way
+    const searchParams = await props.searchParams;
     const message = searchParams && 'message' in searchParams
         ? {
             type: searchParams.type === 'success' ? 'success' as const : 'error' as const,
