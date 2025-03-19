@@ -6,16 +6,16 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 
-// Use a more generic type that accommodates both local and Vercel environments
-type SearchParamsType = Record<string, string | string[] | undefined>;
+// Next.js 13+ page component params type
+type PageProps = {
+    params: { [key: string]: string | string[] };
+    searchParams: { [key: string]: string | string[] | undefined };
+}
 
 export default function Login({
-    searchParams = {} as SearchParamsType
-}: {
-    searchParams?: SearchParamsType
-}) {
+    searchParams = {}
+}: Pick<PageProps, 'searchParams'>) {
     // Extract message data from searchParams in a serializable way
-    // Since we provide a default value above, searchParams will never be undefined
     const message = 'message' in searchParams
         ? {
             type: searchParams.type === 'success' ? 'success' as const : 'error' as const,
