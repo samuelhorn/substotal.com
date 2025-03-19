@@ -6,17 +6,15 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 
-// Next.js 13+ page component params type
-type PageProps = {
-    params: { [key: string]: string | string[] };
-    searchParams: { [key: string]: string | string[] | undefined };
+// Define the props according to Next.js 13+ App Router expectations
+interface PageProps {
+    params: Record<string, string>;
+    searchParams?: Record<string, string | string[] | undefined>;
 }
 
-export default function Login({
-    searchParams = {}
-}: Pick<PageProps, 'searchParams'>) {
+export default function Login({ searchParams = {} }: PageProps) {
     // Extract message data from searchParams in a serializable way
-    const message = 'message' in searchParams
+    const message = searchParams && 'message' in searchParams
         ? {
             type: searchParams.type === 'success' ? 'success' as const : 'error' as const,
             message: String(searchParams.message)
