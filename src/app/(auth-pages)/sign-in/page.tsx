@@ -6,15 +6,18 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 
-interface PageProps {
-    searchParams: { [key: string]: string | string[] | undefined }
-}
+// Use a more generic type that accommodates both local and Vercel environments
+type SearchParamsType = Record<string, string | string[] | undefined>;
 
-export default function Login({ searchParams }: PageProps) {
+export default function Login({
+    searchParams = {}
+}: {
+    searchParams?: SearchParamsType | any
+}) {
     // Extract message data from searchParams in a serializable way
-    const message = searchParams?.message
+    const message = typeof searchParams === 'object' && searchParams && 'message' in searchParams
         ? {
-            type: (searchParams.type as 'error' | 'success') || 'error',
+            type: searchParams.type === 'success' ? 'success' as const : 'error' as const,
             message: String(searchParams.message)
         }
         : undefined;
