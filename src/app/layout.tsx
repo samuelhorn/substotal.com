@@ -11,6 +11,7 @@ import ConsentBanner from "@/components/analytics/consent-banner";
 import { AppProvider } from "@/components/app-provider";
 import { SignInSuccessHandler } from "@/components/sign-in-success-handler";
 import { DataMergeDialog } from "@/components/data-merge-dialog";
+import { Suspense } from "react";
 
 const gabarito = Gabarito({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
@@ -49,7 +50,9 @@ export default function RootLayout({
               <DataMergeDialog />
               <Header />
               <main className="container mx-auto grow flex flex-col justify-center">
-                {children}
+                <Suspense fallback={<div>Loading...</div>}>
+                  {children}
+                </Suspense>
               </main>
               <Footer />
               <Toaster />
