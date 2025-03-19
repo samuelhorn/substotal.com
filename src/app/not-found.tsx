@@ -2,11 +2,15 @@
 
 import { Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-// This component will handle the useSearchParams if needed
+// This component uses useSearchParams and must be wrapped in Suspense
 function NotFoundContent() {
+    // Adding useSearchParams here as the error suggests it might be used
+    const searchParams = useSearchParams();
+
     return (
         <div className="flex flex-col items-center justify-center text-center">
             <p className="text-muted-foreground mb-6 mx-auto max-w-[260px]">
