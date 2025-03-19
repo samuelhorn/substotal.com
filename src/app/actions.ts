@@ -8,6 +8,9 @@ import { AppState } from "@/lib/storage";
 import { Subscription } from "@/lib/subscriptions";
 import { revalidatePath } from "next/cache";
 
+// Create a mechanism to communicate with client-side code
+const SIGN_IN_SUCCESS_KEY = 'subtrack_sign_in_success';
+
 export const signUpAction = async (formData: FormData) => {
     const email = formData.get("email")?.toString();
     const password = formData.get("password")?.toString();
@@ -46,46 +49,26 @@ export const signInAction = async (formData: FormData) => {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const supabase = await createClient();
-
+    
     const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
     });
-
+    
     if (error) {
         return encodedRedirect("error", "/sign-in", error.message);
     }
-
+    
     // Get user session to get the user ID for migration
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-        // Check if there's local data to migrate
-        if (typeof window !== 'undefined') {
-            const localData = localStorage.getItem('app_state');
-            if (localData) {
-                try {
-                    const parsedData = JSON.parse(localData) as AppState;
-                    if (parsedData.subscriptions.length > 0) {
-                        // Migrate data to Supabase
-                        const { error: migrationError } = await supabase
-                            .from('subscriptions')
-                            .insert(parsedData.subscriptions.map((sub: Subscription) => ({
-                                ...sub,
-                                user_id: user.id
-                            })));
-
-                        if (!migrationError) {
-                            // Clear local storage after successful migration
-                            localStorage.clear();
-                        }
-                    }
-                } catch (e) {
-                    console.error('Error migrating data:', e);
-                }
-            }
-        }
+        // Instead of using a custom Response, use URLSearchParams to add our flag
+        const params = new URLSearchParams({
+            'signed_in': 'true'
+        });
+        return redirect(`/subscriptions?${params.toString()}`);
     }
-
+    
     return redirect("/subscriptions");
 };
 

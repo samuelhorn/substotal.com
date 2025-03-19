@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from './ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './ui/dialog'
 import { loadAppState, clearAppState } from '@/lib/storage'
@@ -8,10 +8,8 @@ import { addSubscription } from '@/lib/subscriptions'
 import { toast } from 'sonner'
 import { useSubscriptions } from './app-provider'
 import { createClient } from '@/lib/supabase/supabase'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { CloudIcon, CloudOffIcon } from 'lucide-react'
-import { url } from 'inspector'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 
 // Track whether the user has previously logged in
@@ -29,139 +27,193 @@ function markUserHasLoggedInBefore(): void {
     localStorage.setItem(HAS_LOGGED_IN_BEFORE, 'true');
 }
 
+// Helper to track when a user has just signed in to prevent welcome modal flashing
+const JUST_SIGNED_IN_KEY = 'subtrack_just_signed_in';
+function setJustSignedIn() {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(JUST_SIGNED_IN_KEY, 'true');
+    // Clear this flag after 10 seconds
+    setTimeout(() => {
+        localStorage.removeItem(JUST_SIGNED_IN_KEY);
+    }, 10000);
+}
+
+function hasJustSignedIn() {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem(JUST_SIGNED_IN_KEY) === 'true';
+}
+
 export function WelcomeModal() {
     const [isOpen, setIsOpen] = useState(false)
     const [showSubscriptionForm, setShowSubscriptionForm] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [showCloudDialog, setShowCloudDialog] = useState(false)
-    const { userId } = useSubscriptions()
+    const { userId, subscriptions, refreshData, isLoading: isLoadingSubscriptions } = useSubscriptions()
     const router = useRouter()
+    const searchParams = useSearchParams()
 
-    // Check if this is a new user
+    // Track if initial data check is complete
+    const initialCheckComplete = useRef(false);
+    const hasAttemptedDataLoad = useRef(false);
+
+    // First check if we've just signed in - if so, force data refresh
     useEffect(() => {
-        async function checkUserData() {
-            setIsLoading(true)
-            try {
-                // If user is logged in, mark as logged in before
-                if (userId) {
-                    markUserHasLoggedInBefore();
+        if (userId && !hasAttemptedDataLoad.current) {
+            hasAttemptedDataLoad.current = true;
 
-                    // Check if user has data in Supabase
-                    const supabase = createClient();
-                    const { data: existingData } = await supabase
-                        .from('user_subscriptions')
-                        .select('id')
-                        .eq('user_id', userId)
-                        .limit(1);
+            // Check both localStorage flag and URL parameter for sign-in success
+            const justSignedIn = hasJustSignedIn() || searchParams?.get('signed_in') === 'true';
 
-                    const hasSupabaseData = existingData && existingData.length > 0;
+            if (justSignedIn) {
+                refreshData();
 
-                    // If user has Supabase data, never show welcome modal or sign in banner
-                    if (hasSupabaseData) {
-                        setIsOpen(false);
-                        setShowCloudDialog(false);
-                        return;
-                    }
-
-                    // If logged in but no Supabase data, only show welcome if no local data
-                    const localData = loadAppState();
-                    setIsOpen(localData.subscriptions.length === 0);
-                    setShowCloudDialog(false);
-                } else {
-                    // If not logged in, check local data and login history
-                    const localData = loadAppState();
-                    const hasLocalData = localData.subscriptions.length > 0;
-                    const userLoggedInBefore = hasLoggedInBefore();
-
-                    if (hasLocalData) {
-                        setIsOpen(false);
-                    } else {
-                        // No local data - if they've logged in before, redirect to sign-in
-                        if (userLoggedInBefore) {
-                            setShowCloudDialog(userLoggedInBefore);
-                            return;
-                        }
-                        // New user with no data - show welcome modal
-                        setIsOpen(true);
-                        setShowCloudDialog(false);
-                    }
-                }
-            } catch (error) {
-                console.error('Error checking user data:', error);
-                // Fallback to local data check on error
-                const localData = loadAppState();
-                const hasLocalData = localData.subscriptions.length > 0;
-                if (!hasLocalData && hasLoggedInBefore()) {
-                    // router.push('/sign-in');
-                    return;
-                }
-                setIsOpen(!hasLocalData);
-            } finally {
-                setIsLoading(false);
+                // Remove the flag after use
+                localStorage.removeItem(JUST_SIGNED_IN_KEY);
             }
         }
-        checkUserData();
-    }, [userId, router]);
+    }, [userId, refreshData, searchParams]);
+
+    // Main effect for handling welcome modal visibility
+    useEffect(() => {
+        // If we're still loading subscriptions, don't do anything yet
+        if (isLoadingSubscriptions) {
+            return;
+        }
+
+        // Only run the first time loading is complete
+        if (!initialCheckComplete.current) {
+            initialCheckComplete.current = true;
+
+            const checkUserData = async () => {
+                setIsLoading(true);
+                try {
+                    // Check both localStorage flag and URL parameter for sign-in success
+                    const justSignedIn = hasJustSignedIn() || searchParams?.get('signed_in') === 'true';
+
+                    // If user is logged in
+                    if (userId) {
+                        markUserHasLoggedInBefore();
+
+                        // If we already have subscriptions in the state or just signed in, 
+                        // don't show any modals
+                        if (subscriptions && subscriptions.length > 0 || justSignedIn) {
+                            setIsOpen(false);
+                            setShowCloudDialog(false);
+                            return;
+                        }
+
+                        // If user is authenticated but no subscriptions found, check local data
+                        const localData = loadAppState();
+                        setIsOpen(localData.subscriptions.length === 0);
+                        setShowCloudDialog(false);
+                    } else {
+                        // If not logged in, check local data and login history
+                        const localData = loadAppState();
+                        const hasLocalData = localData.subscriptions.length > 0;
+                        const userLoggedInBefore = hasLoggedInBefore();
+
+                        if (hasLocalData || justSignedIn) {
+                            setIsOpen(false);
+                            setShowCloudDialog(false);
+                        } else {
+                            // No local data - if they've logged in before, show cloud dialog
+                            if (userLoggedInBefore) {
+                                setShowCloudDialog(userLoggedInBefore);
+                                return;
+                            }
+                            // New user with no data - show welcome modal
+                            setIsOpen(true);
+                            setShowCloudDialog(false);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking user data:', error);
+
+                    // Fallback to local data check on error
+                    const localData = loadAppState();
+                    const hasLocalData = localData.subscriptions.length > 0;
+                    setIsOpen(!hasLocalData);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            checkUserData();
+        }
+    }, [isLoadingSubscriptions, subscriptions, userId, searchParams]);
 
     // Handler for adding a new subscription
     const handleAddSubscription = async (subscription: any) => {
-        addSubscription(subscription)
-        toast.success(`Added ${subscription.name} subscription`)
-        setShowSubscriptionForm(false)
-        // Force page reload to update the UI with the new subscription
-        window.location.reload()
+        try {
+            addSubscription(subscription);
+            toast.success(`Added ${subscription.name} subscription`);
+            setShowSubscriptionForm(false);
+            // Use refreshData instead of forcing a page reload
+            await refreshData();
+        } catch (error) {
+            console.error("Error adding subscription:", error);
+            toast.error("Failed to add subscription");
+        }
     }
 
     // Handler for importing test data
-    const handleAddTestData = () => {
-        const testData = [
-            {
-                id: 'netflix',
-                url: 'https://www.netflix.com',
-                name: 'Netflix',
-                amount: 15.99,
-                frequency: 'monthly' as const,
-                category: 'entertainment',
-                // tomorrow
-                start_date: new Date(Date.now() + 86400000).toISOString(),
-                currency: 'USD',
-                hidden: false
-            },
-            {
-                id: 'spotify',
-                url: 'https://www.spotify.com',
-                name: 'Spotify',
-                amount: 9.99,
-                frequency: 'monthly' as const,
-                category: 'entertainment',
-                start_date: new Date(Date.now() + 172800000).toISOString(),
-                currency: 'USD',
-                hidden: false
-            },
-            {
-                id: 'icloud',
-                url: 'https://www.icloud.com',
-                name: 'iCloud',
-                amount: 0.99,
-                frequency: 'monthly' as const,
-                category: 'Software',
-                start_date: new Date(Date.now() + 259200000).toISOString(),
-                currency: 'USD',
-                hidden: false
-            }
-        ];
+    const handleAddTestData = async () => {
+        try {
+            const testData = [
+                {
+                    id: 'netflix',
+                    url: 'https://www.netflix.com',
+                    name: 'Netflix',
+                    amount: 15.99,
+                    frequency: 'monthly' as const,
+                    category: 'entertainment',
+                    // tomorrow
+                    start_date: new Date(Date.now() + 86400000).toISOString(),
+                    currency: 'USD',
+                    hidden: false
+                },
+                {
+                    id: 'spotify',
+                    url: 'https://www.spotify.com',
+                    name: 'Spotify',
+                    amount: 9.99,
+                    frequency: 'monthly' as const,
+                    category: 'entertainment',
+                    start_date: new Date(Date.now() + 172800000).toISOString(),
+                    currency: 'USD',
+                    hidden: false
+                },
+                {
+                    id: 'icloud',
+                    url: 'https://www.icloud.com',
+                    name: 'iCloud',
+                    amount: 0.99,
+                    frequency: 'monthly' as const,
+                    category: 'Software',
+                    start_date: new Date(Date.now() + 259200000).toISOString(),
+                    currency: 'USD',
+                    hidden: false
+                }
+            ];
 
-        const state = loadAppState();
-        state.subscriptions = testData;
-        localStorage.setItem('subtrack_app_state', JSON.stringify(state));
-        toast.success('Added demo subscriptions to help you explore');
-        setIsOpen(false);
-        // Force page reload to update the UI with the test subscriptions
-        window.location.reload();
+            const state = loadAppState();
+            state.subscriptions = testData;
+            localStorage.setItem('subtrack_app_state', JSON.stringify(state));
+            toast.success('Added demo subscriptions to help you explore');
+            setIsOpen(false);
+
+            // Use refreshData instead of forcing a page reload
+            await refreshData();
+        } catch (error) {
+            console.error("Error adding test data:", error);
+            toast.error("Failed to add test data");
+        }
     };
 
-    if (isLoading) {
-        return null // Don't show anything while checking data
+    // Don't show anything until we've completed the initial data check
+    // This prevents the modal from briefly flashing during page load
+    if (isLoading || isLoadingSubscriptions || !initialCheckComplete.current) {
+        return null;
     }
 
     return (
@@ -229,3 +281,6 @@ export function WelcomeModal() {
         </>
     )
 }
+
+// Export the helper function for other components to use
+export { setJustSignedIn };

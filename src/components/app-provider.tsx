@@ -55,6 +55,9 @@ interface AppContextType {
 
     // Overall loading state
     isLoading: boolean;
+
+    // Refresh data function
+    refreshData: () => Promise<void>;
 }
 
 // Check if migration has been completed
@@ -85,8 +88,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const [userId, setUserId] = useState<string | null>(null);
     const [migrationCompleted, setMigrationCompleted] = useState(false);
 
-    // Computed overall loading state
-    const isLoading = isLoadingSubscriptions || isLoadingCurrency;
+    // Track if we're currently loading data
+    const [isLoading, setIsLoading] = useState(true);
 
     const handleSetMigrationCompleted = useCallback(() => {
         localStorage.setItem(MIGRATION_COMPLETED_KEY, 'true');
@@ -147,120 +150,146 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
     }, []);
 
-    // Load data on mount and handle automatic migration
-    useEffect(() => {
-        const loadData = async () => {
-            try {
-                const supabase = createClient();
-                // Check if user is authenticated
-                const { data: { user } } = await supabase.auth.getUser();
-                setUserId(user?.id || null);
+    // Load data function that can be called when needed
+    const loadData = useCallback(async () => {
+        // Set both loading flags at the start
+        setIsLoadingSubscriptions(true);
+        setIsLoadingCurrency(true);
 
-                // Set migration status from localStorage
-                const isMigrated = hasMigrationCompleted();
-                setMigrationCompleted(isMigrated);
+        try {
+            const supabase = createClient();
 
-                // First load currency settings
-                await loadCurrencySettings();
+            // Check if user is authenticated
+            const { data: { user } } = await supabase.auth.getUser();
+            setUserId(user?.id || null);
 
-                // Load table sort settings
-                const sortSettings = await loadTableSortSettings();
-                setTableSortSettingsState(sortSettings);
+            // Set migration status from localStorage
+            const isMigrated = hasMigrationCompleted();
+            setMigrationCompleted(isMigrated);
 
-                // Load chart view mode
-                const viewMode = await loadChartViewMode();
-                setChartViewModeState(viewMode || "monthly");
+            // Load settings in parallel but make sure to properly await them
+            const currencyPromise = loadCurrencySettings();
+            const sortSettingsPromise = loadTableSortSettings();
+            const chartViewPromise = loadChartViewMode();
 
-                // Then load subscriptions
-                setIsLoadingSubscriptions(true);
+            // Wait for the settings to load
+            await currencyPromise;
+            const sortSettings = await sortSettingsPromise;
+            setTableSortSettingsState(sortSettings);
+            const viewMode = await chartViewPromise;
+            setChartViewModeState(viewMode || "monthly");
 
-                if (user?.id) {
-                    // If user is logged in, check for existing Supabase data first
-                    const { data: userSubs, error } = await supabase
-                        .from('user_subscriptions')
-                        .select('*')
-                        .eq('user_id', user.id);
+            // Now load subscriptions
+            if (user?.id) {
+                // If user is logged in, check for existing Supabase data first
+                const { data: userSubs, error } = await supabase
+                    .from('user_subscriptions')
+                    .select('*')
+                    .eq('user_id', user.id);
 
-                    if (error) throw error;
+                if (error) throw error;
 
-                    const hasSupabaseData = userSubs && userSubs.length > 0;
+                const hasSupabaseData = userSubs && userSubs.length > 0;
 
-                    // If user has Supabase data, use it
-                    if (hasSupabaseData) {
-                        setSubscriptions(userSubs);
-                        handleSetMigrationCompleted();
+                // If user has Supabase data, use it
+                if (hasSupabaseData) {
+                    setSubscriptions(userSubs);
+                    handleSetMigrationCompleted();
 
-                        // Cloud-first approach: Clear local storage
-                        if (!isMigrated) {
-                            clearAppState();
-                        }
-                    } else {
-                        // No Supabase data - check for local data to migrate
-                        const localData = loadSubscriptionsFromStorage();
-
-                        if (localData.length > 0) {
-                            // We have local data, let's migrate it automatically
-                            const subscriptionsToMigrate = localData.map(sub => ({
-                                ...sub,
-                                user_id: user.id
-                            }));
-
-                            // Migrate to Supabase
-                            const { error: migrateError } = await supabase
-                                .from('user_subscriptions')
-                                .upsert(subscriptionsToMigrate);
-
-                            if (migrateError) throw migrateError;
-
-                            // Get settings from local storage as well
-                            const appState = loadAppState();
-
-                            // Migrate settings if any
-                            if (Object.keys(appState.settings).length > 0) {
-                                const { error: settingsError } = await supabase
-                                    .from('user_settings')
-                                    .upsert({
-                                        user_id: user.id,
-                                        ...appState.settings
-                                    }, {
-                                        onConflict: 'user_id',
-                                        ignoreDuplicates: false
-                                    });
-
-                                if (settingsError) console.error('Settings migration error:', settingsError);
-                            }
-
-                            // Set the subscriptions and mark migration as complete
-                            setSubscriptions(localData);
-                            handleSetMigrationCompleted();
-                            toast.success('Your data has been migrated to your account!');
-
-                            // Cloud-first approach: Clear local storage after migration
-                            clearAppState();
-                        } else {
-                            // No local data either, start fresh
-                            setSubscriptions([]);
-                            handleSetMigrationCompleted();
-                        }
+                    // Cloud-first approach: Clear local storage
+                    if (!isMigrated) {
+                        clearAppState();
                     }
                 } else {
-                    // Not logged in - use local data
+                    // No Supabase data - check for local data to migrate
                     const localData = loadSubscriptionsFromStorage();
-                    setSubscriptions(localData);
+
+                    if (localData.length > 0) {
+                        // We have local data, let's migrate it automatically
+                        const subscriptionsToMigrate = localData.map(sub => ({
+                            ...sub,
+                            user_id: user.id
+                        }));
+
+                        // Migrate to Supabase
+                        const { error: migrateError } = await supabase
+                            .from('user_subscriptions')
+                            .upsert(subscriptionsToMigrate);
+
+                        if (migrateError) throw migrateError;
+
+                        // Get settings from local storage as well
+                        const appState = loadAppState();
+
+                        // Migrate settings if any
+                        if (Object.keys(appState.settings).length > 0) {
+                            const { error: settingsError } = await supabase
+                                .from('user_settings')
+                                .upsert({
+                                    user_id: user.id,
+                                    ...appState.settings
+                                }, {
+                                    onConflict: 'user_id',
+                                    ignoreDuplicates: false
+                                });
+
+                            if (settingsError) console.error('Settings migration error:', settingsError);
+                        }
+
+                        // Set the subscriptions and mark migration as complete
+                        setSubscriptions(localData);
+                        handleSetMigrationCompleted();
+                        toast.success('Your data has been migrated to your account!');
+
+                        // Cloud-first approach: Clear local storage after migration
+                        clearAppState();
+                    } else {
+                        // No local data either, start fresh
+                        setSubscriptions([]);
+                        handleSetMigrationCompleted();
+                    }
                 }
-            } catch (error) {
-                console.error('Error loading data:', error);
-                toast.error('Failed to load your data');
-                // Fall back to local storage if Supabase fails
+            } else {
+                // Not logged in - use local data
                 const localData = loadSubscriptionsFromStorage();
                 setSubscriptions(localData);
-            } finally {
-                setIsLoadingSubscriptions(false);
             }
-        };
-
-        loadData();
+        } catch (error) {
+            console.error('Error loading data:', error);
+            toast.error('Failed to load your data');
+            // Fall back to local storage if Supabase fails
+            const localData = loadSubscriptionsFromStorage();
+            setSubscriptions(localData);
+        } finally {
+            // Always reset loading states
+            setIsLoadingSubscriptions(false);
+            setIsLoadingCurrency(false);
+        }
     }, [handleSetMigrationCompleted, loadCurrencySettings]);
+
+    // Set up auth state listener and initial data load
+    useEffect(() => {
+        const supabase = createClient();
+
+        // Initial data load once on mount
+        loadData();
+
+        // Listen for auth state changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            console.log('Auth state changed:', event, session?.user?.id);
+            if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+                // Load data on sign in
+                loadData();
+            } else if (event === 'SIGNED_OUT') {
+                loadData();
+            }
+        });
+
+        // Cleanup listener on unmount
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [loadData]);
 
     const handleAddSubscription = useCallback(async (subscription: Subscription) => {
         try {
@@ -471,7 +500,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 setMigrationCompleted: handleSetMigrationCompleted,
 
                 // Overall loading state
-                isLoading
+                isLoading: isLoadingSubscriptions || isLoadingCurrency,
+
+                // Function to manually refresh data
+                refreshData: loadData
             }}
         >
             {children}
@@ -497,7 +529,8 @@ export function useSubscriptions() {
         deleteSubscription,
         toggleHidden,
         userId,
-        setMigrationCompleted
+        setMigrationCompleted,
+        refreshData
     } = useApp();
 
     return {
@@ -508,7 +541,8 @@ export function useSubscriptions() {
         deleteSubscription,
         toggleHidden,
         userId,
-        setMigrationCompleted
+        setMigrationCompleted,
+        refreshData
     };
 }
 

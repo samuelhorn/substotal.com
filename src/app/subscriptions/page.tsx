@@ -5,6 +5,7 @@ import { SubscriptionTableSection } from "@/components/subscription-table-sectio
 import { WelcomeModal } from "@/components/welcome-modal";
 import { createClient } from "@/lib/supabase/server";
 import { AuthRedirect } from "@/components/auth-redirect";
+import { AutoDataLoader } from "@/components/auto-data-loader";
 import { revalidatePath } from "next/cache";
 
 const metaTitle = "Your Subscriptions | Substotal";
@@ -36,6 +37,8 @@ export default async function SubscriptionsPage() {
     <>
       {/* If no user is logged in, check if we should redirect to sign-in */}
       {!user && <AuthRedirect />}
+      {/* Add AutoDataLoader to ensure data is loaded after sign-in */}
+      <AutoDataLoader />
       <div className="space-y-4">
         {/* Welcome Modal */}
         <WelcomeModal />

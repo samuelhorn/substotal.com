@@ -1,13 +1,23 @@
 import { signInAction } from "@/app/actions";
-import { FormMessage, Message } from "@/components/form-message";
+import { FormMessage } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 
-export default async function Login(props: { searchParams: Promise<Message> }) {
-    const searchParams = await props.searchParams;
+interface PageProps {
+    searchParams: { [key: string]: string | string[] | undefined }
+}
+
+export default function Login({ searchParams }: PageProps) {
+    // Extract message data from searchParams in a serializable way
+    const message = searchParams?.message
+        ? {
+            type: (searchParams.type as 'error' | 'success') || 'error',
+            message: String(searchParams.message)
+        }
+        : undefined;
 
     return (
         <Card className="mx-auto min-w-xs max-w-sm mt-12">
@@ -47,7 +57,7 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
                         <SubmitButton pendingText="Signing In..." formAction={signInAction}>
                             Sign in
                         </SubmitButton>
-                        <FormMessage message={searchParams} />
+                        <FormMessage message={message} />
                     </div>
                 </form>
             </CardContent>

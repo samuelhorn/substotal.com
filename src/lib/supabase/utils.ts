@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 /**
- * Redirects to a specified path with an encoded message as a query parameter.
+ * Redirects to a specified path with encoded message parameters.
  * @param {('error' | 'success')} type - The type of message, either 'error' or 'success'.
  * @param {string} path - The path to redirect to.
  * @param {string} message - The message to be encoded and added as a query parameter.
@@ -12,5 +12,8 @@ export function encodedRedirect(
     path: string,
     message: string,
 ) {
-    return redirect(`${path}?${type}=${encodeURIComponent(message)}`);
+    const searchParams = new URLSearchParams();
+    searchParams.set('type', type);
+    searchParams.set('message', message);
+    return redirect(`${path}?${searchParams.toString()}`);
 }
