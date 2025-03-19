@@ -37,30 +37,30 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="scroll-smooth">
       <body className={`${gabarito.className} antialiased min-h-dvh flex flex-col`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <AppProvider>
-            <ErrorBoundary>
-              {/* Add SignInSuccessHandler to detect when a user just signed in */}
-              <SignInSuccessHandler />
-              <DataMergeDialog />
-              <Header />
-              <main className="container mx-auto grow flex flex-col justify-center">
-                <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div>Loading...</div>}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <AppProvider>
+              <ErrorBoundary>
+                {/* Add SignInSuccessHandler to detect when a user just signed in */}
+                <SignInSuccessHandler />
+                <DataMergeDialog />
+                <Header />
+                <main className="container mx-auto grow flex flex-col justify-center">
                   {children}
-                </Suspense>
-              </main>
-              <Footer />
-              <Toaster />
-              <GoogleAnalyticsProvider measurementId={GA_MEASUREMENT_ID} />
-              <ConsentBanner />
-            </ErrorBoundary>
-          </AppProvider>
-        </ThemeProvider>
+                </main>
+                <Footer />
+                <Toaster />
+                <GoogleAnalyticsProvider measurementId={GA_MEASUREMENT_ID} />
+                <ConsentBanner />
+              </ErrorBoundary>
+            </AppProvider>
+          </ThemeProvider>
+        </Suspense>
       </body>
     </html>
   );
