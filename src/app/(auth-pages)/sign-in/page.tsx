@@ -6,13 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 
-// Define the props according to Next.js 13+ App Router expectations
-interface PageProps {
-    params: Record<string, string>;
-    searchParams?: Record<string, string | string[] | undefined>;
-}
-
-export default function Login({ searchParams = {} }: PageProps) {
+// Standard Next.js App Router page component
+export default function Login({
+    searchParams,
+}: {
+    searchParams?: { [key: string]: string | string[] | undefined };
+}) {
     // Extract message data from searchParams in a serializable way
     const message = searchParams && 'message' in searchParams
         ? {
