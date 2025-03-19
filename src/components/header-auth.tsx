@@ -55,7 +55,7 @@ export async function AuthButton() {
                     <Tooltip>
                         <TooltipTrigger>
                             <div className="rounded-full p-0.5 bg-green-500 border shadow-md">
-                                <CloudIcon className="h-4 w-4 text-green-900" />
+                                <CloudIcon className="h-3 w-3 text-green-900" />
                             </div>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -105,7 +105,7 @@ export async function AuthButton() {
                     <Tooltip>
                         <TooltipTrigger>
                             <div className="rounded-full p-0.5 bg-red-500 border shadow-md">
-                                <CloudOffIcon className="h-4 w-4 text-red-900" />
+                                <CloudOffIcon className="h-3 w-3 text-red-900" />
                             </div>
                         </TooltipTrigger>
                         <TooltipContent>

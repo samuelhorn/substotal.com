@@ -58,6 +58,12 @@ interface AppContextType {
 
     // Refresh data function
     refreshData: () => Promise<void>;
+
+    // Data merging
+    showMergePrompt: boolean;
+    handleMergeData: (mergeOption: 'cloud' | 'local' | 'both') => Promise<void>;
+    pendingLocalData: Subscription[];
+    pendingCloudData: Subscription[];
 }
 
 // Check if migration has been completed
@@ -87,7 +93,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // User and migration state
     const [userId, setUserId] = useState<string | null>(null);
     const [migrationCompleted, setMigrationCompleted] = useState(false);
-
+    // Add new state for data merge prompt
+    const [showMergePrompt, setShowMergePrompt] = useState(false);
+    const [pendingLocalData, setPendingLocalData] = useState<Subscription[]>([]);
+    const [pendingCloudData, setPendingCloudData] = useState<Subscription[]>([]);
     // Track if we're currently loading data
     const [isLoading, setIsLoading] = useState(true);
 
@@ -189,22 +198,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
                 if (error) throw error;
 
+                const localData = loadSubscriptionsFromStorage();
                 const hasSupabaseData = userSubs && userSubs.length > 0;
+                const hasLocalData = localData && localData.length > 0;
 
                 // If user has Supabase data, use it
                 if (hasSupabaseData) {
-                    setSubscriptions(userSubs);
-                    handleSetMigrationCompleted();
-
-                    // Cloud-first approach: Clear local storage
-                    if (!isMigrated) {
-                        clearAppState();
+                    // Check if there's also local data that needs to be merged
+                    if (hasLocalData) {
+                        // We have both cloud and local data
+                        // Instead of automatically merging, prompt the user
+                        setPendingLocalData(localData);
+                        setPendingCloudData(userSubs);
+                        setShowMergePrompt(true);
+                        // Load cloud data for now
+                        setSubscriptions(userSubs);
+                    } else {
+                        // No local data, just use cloud data
+                        setSubscriptions(userSubs);
+                        handleSetMigrationCompleted();
                     }
                 } else {
                     // No Supabase data - check for local data to migrate
-                    const localData = loadSubscriptionsFromStorage();
-
-                    if (localData.length > 0) {
+                    if (hasLocalData) {
                         // We have local data, let's migrate it automatically
                         const subscriptionsToMigrate = localData.map(sub => ({
                             ...sub,
@@ -253,6 +269,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 // Not logged in - use local data
                 const localData = loadSubscriptionsFromStorage();
                 setSubscriptions(localData);
+                // Reset merge prompt state when logged out
+                setShowMergePrompt(false);
+                setPendingLocalData([]);
+                setPendingCloudData([]);
             }
         } catch (error) {
             console.error('Error loading data:', error);
@@ -266,6 +286,90 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             setIsLoadingCurrency(false);
         }
     }, [handleSetMigrationCompleted, loadCurrencySettings]);
+
+    // Add new function to handle data merging
+    const handleMergeData = useCallback(async (mergeOption: 'cloud' | 'local' | 'both') => {
+        if (!userId || (!pendingLocalData.length && !pendingCloudData.length)) {
+            setShowMergePrompt(false);
+            return;
+        }
+
+        try {
+            const supabase = createClient();
+            let finalSubscriptions: Subscription[] = [];
+
+            if (mergeOption === 'cloud') {
+                // Keep cloud data only
+                finalSubscriptions = [...pendingCloudData];
+            } else if (mergeOption === 'local') {
+                // Replace cloud with local
+                finalSubscriptions = pendingLocalData.map(sub => ({
+                    ...sub,
+                    user_id: userId
+                }));
+
+                // Update Supabase: first delete all existing subs
+                await supabase
+                    .from('user_subscriptions')
+                    .delete()
+                    .eq('user_id', userId);
+
+                // Then insert the local ones
+                const { error } = await supabase
+                    .from('user_subscriptions')
+                    .insert(finalSubscriptions);
+
+                if (error) throw error;
+            } else if (mergeOption === 'both') {
+                // Merge both data sets
+                // Create a Map to track existing subscriptions by ID
+                const subMap = new Map<string, Subscription>();
+
+                // Add cloud subs to the map first
+                pendingCloudData.forEach(sub => {
+                    subMap.set(sub.id, sub);
+                });
+
+                // Add or overwrite with local subs (with user_id)
+                const localWithUserId = pendingLocalData.map(sub => ({
+                    ...sub,
+                    user_id: userId
+                }));
+
+                localWithUserId.forEach(sub => {
+                    // Only add if it doesn't exist in cloud
+                    if (!subMap.has(sub.id)) {
+                        subMap.set(sub.id, sub);
+                    }
+                });
+
+                finalSubscriptions = Array.from(subMap.values());
+
+                // Update all subscriptions in Supabase
+                // Using upsert to handle both updates and inserts
+                const { error } = await supabase
+                    .from('user_subscriptions')
+                    .upsert(finalSubscriptions);
+
+                if (error) throw error;
+            }
+
+            // Update local state
+            setSubscriptions(finalSubscriptions);
+            // Clear local storage since we've now merged/handled the data
+            clearAppState();
+            // Reset merge state
+            setShowMergePrompt(false);
+            setPendingLocalData([]);
+            setPendingCloudData([]);
+
+            toast.success('Subscription data synchronized successfully!');
+            handleSetMigrationCompleted();
+        } catch (error) {
+            console.error('Error merging data:', error);
+            toast.error('Failed to merge subscription data');
+        }
+    }, [userId, pendingLocalData, pendingCloudData, handleSetMigrationCompleted]);
 
     // Set up auth state listener and initial data load
     useEffect(() => {
@@ -499,6 +603,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 userId,
                 setMigrationCompleted: handleSetMigrationCompleted,
 
+                // Data merging
+                showMergePrompt,
+                handleMergeData,
+                pendingLocalData,
+                pendingCloudData,
+
                 // Overall loading state
                 isLoading: isLoadingSubscriptions || isLoadingCurrency,
 
@@ -530,6 +640,10 @@ export function useSubscriptions() {
         toggleHidden,
         userId,
         setMigrationCompleted,
+        showMergePrompt,
+        handleMergeData,
+        pendingLocalData,
+        pendingCloudData,
         refreshData
     } = useApp();
 
@@ -542,6 +656,10 @@ export function useSubscriptions() {
         toggleHidden,
         userId,
         setMigrationCompleted,
+        showMergePrompt,
+        handleMergeData,
+        pendingLocalData,
+        pendingCloudData,
         refreshData
     };
 }

@@ -10,6 +10,7 @@ import GoogleAnalyticsProvider from "@/components/analytics/google-analytics";
 import ConsentBanner from "@/components/analytics/consent-banner";
 import { AppProvider } from "@/components/app-provider";
 import { SignInSuccessHandler } from "@/components/sign-in-success-handler";
+import { DataMergeDialog } from "@/components/data-merge-dialog";
 
 const gabarito = Gabarito({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
@@ -45,6 +46,7 @@ export default function RootLayout({
             <ErrorBoundary>
               {/* Add SignInSuccessHandler to detect when a user just signed in */}
               <SignInSuccessHandler />
+              <DataMergeDialog />
               <Header />
               <main className="container mx-auto grow flex flex-col justify-center">
                 {children}

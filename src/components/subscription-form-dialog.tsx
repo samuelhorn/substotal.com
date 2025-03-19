@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import { CalendarIcon } from "lucide-react";
+import * as z from "zod"; // Add import for zod
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -55,6 +56,14 @@ const CATEGORIES = [
     "Other",
 ];
 
+// Create a modified schema for the form that handles empty URL values properly
+const formSubscriptionSchema = subscriptionSchema.extend({
+    url: z.union([z.string().url().nullish(), z.literal("")]),
+});
+
+// Type for the form values
+type SubscriptionFormValues = z.infer<typeof formSubscriptionSchema>;
+
 interface SubscriptionFormDialogProps {
     subscription?: Subscription;
     onSubmit: (subscription: Subscription) => void;
@@ -98,8 +107,8 @@ export function SubscriptionFormDialog({
     }, [primaryCurrency]);
 
 
-    const form = useForm<Subscription>({
-        resolver: zodResolver(subscriptionSchema),
+    const form = useForm<SubscriptionFormValues>({
+        resolver: zodResolver(formSubscriptionSchema),
         defaultValues: {
             id: subscription?.id || uuidv4(),
             name: subscription?.name || "",
@@ -109,7 +118,7 @@ export function SubscriptionFormDialog({
             commitment_end_date: subscription?.commitment_end_date,
             category: subscription?.category || "Other",
             currency: subscription?.currency || primaryCurrency || "USD",
-            url: subscription?.url || null,
+            url: subscription?.url || "",
         },
     });
 
@@ -120,7 +129,7 @@ export function SubscriptionFormDialog({
         }
     }, [subscription, form]);
 
-    function handleSubmit(values: Subscription) {
+    function handleSubmit(values: SubscriptionFormValues) {
         const newSubscription: Subscription = {
             id: subscription?.id || `sub_${Date.now()}`,
             name: values.name,
@@ -130,7 +139,7 @@ export function SubscriptionFormDialog({
             commitment_end_date: values.commitment_end_date,
             category: values.category,
             currency: values.currency,
-            url: values.url || null,
+            url: values.url === "" ? null : values.url,
             hidden: false
         };
 
@@ -187,6 +196,11 @@ export function SubscriptionFormDialog({
                                     placeholder="https://netflix.com"
                                     {...field}
                                     value={field.value || ""}
+                                    onChange={(e) => {
+                                        // Handle empty string correctly
+                                        const value = e.target.value;
+                                        field.onChange(value === "" ? "" : value);
+                                    }}
                                 />
                             </FormControl>
                             <FormMessage />
