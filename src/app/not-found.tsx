@@ -10,7 +10,7 @@ function NotFoundContent() {
     return (
         <div className="flex flex-col items-center justify-center text-center">
             <p className="text-muted-foreground mb-6 mx-auto max-w-[260px]">
-                The page you are looking for doesn't exist or has been moved.
+                The page you are looking for doesn&apos;t exist or has been moved.
             </p>
             <Button asChild>
                 <Link href="/">Return to home</Link>
