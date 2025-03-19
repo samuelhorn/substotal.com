@@ -6,7 +6,6 @@ import { WelcomeModal } from "@/components/welcome-modal";
 import { createClient } from "@/lib/supabase/server";
 import { AuthRedirect } from "@/components/auth-redirect";
 import { AutoDataLoader } from "@/components/auto-data-loader";
-import { revalidatePath } from "next/cache";
 
 const metaTitle = "Your Subscriptions | Substotal";
 const metaDescription = "Manage and track all your subscription expenses in one place with SubTrack.";

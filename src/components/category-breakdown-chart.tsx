@@ -54,16 +54,6 @@ export function CategoryBreakdownChart({
         return convertAmount(amount, fromCurrency, primaryCurrency, exchangeRates);
     };
 
-    const lockedInSubs = subscriptions.filter(sub => {
-        const today = new Date();
-        if (!sub.commitment_end_date) return false;
-        const endDate = new Date(sub.commitment_end_date);
-        return endDate > today;
-    });
-
-    // Check if any subscriptions have commitment end dates
-    const hasLockedInSubs = lockedInSubs.length > 0;
-
     // Calculate category costs based on viewMode
     const categoryData = Object.entries(getSubscriptionsByCategory(subscriptions)).map(([category, subs]) => ({
         category,

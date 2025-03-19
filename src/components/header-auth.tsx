@@ -2,7 +2,7 @@ import { signOutAction } from "@/app/actions";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { CloudIcon, CloudOffIcon, UserIcon, Settings, LogOut, LogIn, UserPlus, HelpCircle } from "lucide-react";
+import { CloudIcon, CloudOffIcon, UserIcon, LogOut, LogIn, UserPlus } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import {
     DropdownMenu,

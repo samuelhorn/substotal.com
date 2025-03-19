@@ -6,10 +6,6 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AppState } from "@/lib/storage";
 import { Subscription } from "@/lib/subscriptions";
-import { revalidatePath } from "next/cache";
-
-// Create a mechanism to communicate with client-side code
-const SIGN_IN_SUCCESS_KEY = 'subtrack_sign_in_success';
 
 export const signUpAction = async (formData: FormData) => {
     const email = formData.get("email")?.toString();
@@ -49,16 +45,16 @@ export const signInAction = async (formData: FormData) => {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const supabase = await createClient();
-    
+
     const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
     });
-    
+
     if (error) {
         return encodedRedirect("error", "/sign-in", error.message);
     }
-    
+
     // Get user session to get the user ID for migration
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
@@ -68,7 +64,7 @@ export const signInAction = async (formData: FormData) => {
         });
         return redirect(`/subscriptions?${params.toString()}`);
     }
-    
+
     return redirect("/subscriptions");
 };
 

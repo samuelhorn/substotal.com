@@ -10,7 +10,7 @@ import {
     deleteSubscription as deleteSubscriptionFromStorage,
 } from "@/lib/subscriptions";
 import { createClient } from "@/lib/supabase/supabase";
-import { hasMigratableData, clearAppState, saveAppStateAsync, loadAppState } from "@/lib/storage";
+import { clearAppState, loadAppState } from "@/lib/storage";
 import {
     loadPrimaryCurrency,
     savePrimaryCurrency,
@@ -66,12 +66,6 @@ interface AppContextType {
     pendingCloudData: Subscription[];
 }
 
-// Check if migration has been completed
-function hasMigrationCompleted(): boolean {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem(MIGRATION_COMPLETED_KEY) === 'true';
-}
-
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
@@ -92,17 +86,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     // User and migration state
     const [userId, setUserId] = useState<string | null>(null);
-    const [migrationCompleted, setMigrationCompleted] = useState(false);
+
     // Add new state for data merge prompt
     const [showMergePrompt, setShowMergePrompt] = useState(false);
     const [pendingLocalData, setPendingLocalData] = useState<Subscription[]>([]);
     const [pendingCloudData, setPendingCloudData] = useState<Subscription[]>([]);
-    // Track if we're currently loading data
-    const [isLoading, setIsLoading] = useState(true);
 
     const handleSetMigrationCompleted = useCallback(() => {
         localStorage.setItem(MIGRATION_COMPLETED_KEY, 'true');
-        setMigrationCompleted(true);
     }, []);
 
     // Load currency settings
@@ -171,10 +162,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             // Check if user is authenticated
             const { data: { user } } = await supabase.auth.getUser();
             setUserId(user?.id || null);
-
-            // Set migration status from localStorage
-            const isMigrated = hasMigrationCompleted();
-            setMigrationCompleted(isMigrated);
 
             // Load settings in parallel but make sure to properly await them
             const currencyPromise = loadCurrencySettings();
@@ -484,7 +471,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const handleDeleteSubscription = useCallback(async (id: string) => {
         // Store previous state for rollback
         const previousSubscriptions = [...subscriptions];
-        const subscriptionToDelete = subscriptions.find(s => s.id === id);
 
         try {
             if (userId) {

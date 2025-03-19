@@ -104,6 +104,7 @@ export function SubscriptionFormDialog({
 
     useEffect(() => {
         form.setValue("currency", primaryCurrency);
+        /* eslint-disable-next-line react-hooks/exhaustive-deps */
     }, [primaryCurrency]);
 
 
