@@ -88,7 +88,7 @@ export function SubscriptionFormDialog({
     className,
 }: SubscriptionFormDialogProps) {
     const [internalOpen, setInternalOpen] = useState(false);
-    const { primaryCurrency, isLoading } = useCurrency();
+    const { primaryCurrency } = useCurrency();
 
     // If in controlled mode, use external state
     const isControlled = externalOpen !== undefined && externalOnOpenChange !== undefined;

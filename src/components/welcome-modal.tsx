@@ -2,15 +2,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { Button } from './ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './ui/dialog'
-import { loadAppState, clearAppState } from '@/lib/storage'
+import { loadAppState } from '@/lib/storage'
 import { SubscriptionFormDialog } from './subscription-form-dialog'
 import { addSubscription } from '@/lib/subscriptions'
 import { toast } from 'sonner'
 import { useSubscriptions } from './app-provider'
-import { createClient } from '@/lib/supabase/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CloudIcon, CloudOffIcon } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 
 // Track whether the user has previously logged in
 const HAS_LOGGED_IN_BEFORE = 'subtrack_has_logged_in_before';
@@ -262,7 +260,7 @@ export function WelcomeModal() {
                             Welcome Back!
                         </DialogTitle>
                         <DialogDescription className="space-y-4 pt-2">
-                            We noticed you've previously used cloud storage. If you would you like to
+                            We noticed you&apos;ve previously used cloud storage. If you would you like to
                             access your existing subscriptions and continue where you left off, you can sign in to below.
                         </DialogDescription>
                     </DialogHeader>

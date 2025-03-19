@@ -1,4 +1,4 @@
-import { ChartViewMode, TableSortSettings } from "./settings";
+import { ChartViewMode } from "./settings";
 
 export interface UserSettings {
     id?: string;

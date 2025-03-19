@@ -14,17 +14,12 @@ import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 export function SettingsDialog() {
     const [isOpen, setIsOpen] = useState(false)
     const [isAuthenticated, setIsAuthenticated] = useState(false)
-    const [userId, setUserId] = useState<string | null>(null)
-    const [importData, setImportData] = useState('')
 
     useEffect(() => {
         const checkAuth = async () => {
             const supabase = createClient()
             const { data: { user } } = await supabase.auth.getUser()
             setIsAuthenticated(!!user)
-            if (user) {
-                setUserId(user.id)
-            }
         }
         checkAuth()
     }, [])
