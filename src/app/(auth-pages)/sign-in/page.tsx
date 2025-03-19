@@ -12,8 +12,8 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
     const searchParams = await props.searchParams;
     const message = searchParams && 'message' in searchParams
         ? {
-            type: searchParams.type === 'success' ? 'success' as const : 'error' as const,
-            message: String(searchParams.message)
+            type: searchParams?.type === 'success' ? 'success' as const : 'error' as const,
+            message: String(searchParams?.message)
         }
         : undefined;
 
