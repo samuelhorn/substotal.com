@@ -24,8 +24,8 @@ export async function AuthButton() {
             <div className="relative">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Avatar className="h-8 w-8 cursor-pointer">
-                            <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
+                        <Avatar className="h-10 w-10 cursor-pointer">
+                            <AvatarFallback className="w-10 h-10">{user.email?.[0].toUpperCase()}</AvatarFallback>
                         </Avatar>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="min-w-64">
@@ -70,8 +70,8 @@ export async function AuthButton() {
             <div className="relative">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Avatar className="h-8 w-8 opacity-50 cursor-pointer">
-                            <AvatarFallback><UserIcon className="h-4 w-4" /></AvatarFallback>
+                        <Avatar className="h-10 w-10 opacity-50 cursor-pointer">
+                            <AvatarFallback className="w-10 h-10"><UserIcon className="h-5 w-5" /></AvatarFallback>
                         </Avatar>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="min-w-64">

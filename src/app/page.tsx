@@ -37,16 +37,21 @@ export default function LandingPage() {
       <header className="container mx-auto px-4 pt-24 pb-16 text-center">
         <h1 className="text-5xl sm:text-7xl max-w-4xl mx-auto font-bold tracking-tighter mb-6">Track Your Subscriptions and Take Control of Your Spending</h1>
         <p className="text-lg sm:text-2xl text-muted-foreground max-w-2xl mx-auto mb-8">
-          Manage all your subscriptions in one place.<br className="hidden sm:block" />No account required, completely private, and forever free.
+          Manage all your subscriptions in one place. Use privately with no account, or sign up and sync across all your devices.
         </p>
         <div className="flex flex-wrap gap-4 justify-center">
-          <Link href="/subscriptions">
-            <Button size="lg" className="text-lg px-8">Start Tracking Now</Button>
-          </Link>
+          <Button size="lg" className="text-lg px-8">
+            <Link href="/subscriptions">
+              Go to Dashboard
+            </Link>
+          </Button>
           <Button asChild variant="outline" size="lg" className="text-lg px-8">
-            <a href="#how-it-works">See How It Works</a>
+            <Link href="/sign-up">Sign Up</Link>
           </Button>
         </div>
+        <Button asChild variant="link" size="lg" className="text-lg px-8 mt-4">
+          <a href="#how-it-works">See How It Works</a>
+        </Button>
         <div className="flex items-center justify-center gap-2 mt-12">
           <div className="flex">
             <Avatar className="w-12 h-12 -ml-5 border-4 border-background rounded-full">
@@ -70,7 +75,7 @@ export default function LandingPage() {
       </header>
 
       {/* Main Value Proposition */}
-      <section className="bg-accent rounded-2xl py-12 lg:p-16">
+      <section className="bg-card rounded-2xl py-12 lg:p-16">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center px-4">
             <h2 className="text-4xl font-bold mb-6">Take Control of Your Subscription Costs</h2>
@@ -84,30 +89,30 @@ export default function LandingPage() {
           <div className="mt-12">
             <h3 className="text-3xl font-bold text-center mb-8">Your Subscription Dashboard</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mt-8">
-              <Card>
+              <Card className="bg-background">
                 <CardContent className="pt-4">
-                  <HandCoins className="text-primary mb-4 w-12 h-12" />
+                  <HandCoins className="text-primary mb-8 w-10 h-10" />
                   <h4 className="text-xl font-bold mb-2">View Total Costs</h4>
                   <p className="text-muted-foreground">See your monthly and yearly subscription expenses at a glance</p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-background">
                 <CardContent className="pt-4">
-                  <Lock className="text-primary mb-4 w-12 h-12" />
+                  <Lock className="text-primary mb-8 w-10 h-10" />
                   <h4 className="text-xl font-bold mb-2">Track Commitments</h4>
                   <p className="text-muted-foreground">Identify locked-in subscriptions you can&apos;t cancel yet</p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-background">
                 <CardContent className="pt-4">
-                  <Orbit className="text-primary mb-4 w-12 h-12" />
+                  <Orbit className="text-primary mb-8 w-10 h-10" />
                   <h4 className="text-xl font-bold mb-2">Plan Ahead</h4>
                   <p className="text-muted-foreground">Visualize upcoming payments and renewal dates</p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-background">
                 <CardContent className="pt-4">
-                  <Lightbulb className="text-primary mb-4 w-12 h-12" />
+                  <Lightbulb className="text-primary mb-8 w-10 h-10" />
                   <h4 className="text-xl font-bold mb-2">Make Smarter Decisions</h4>
                   <p className="text-muted-foreground">Spot opportunities to save money</p>
                 </CardContent>
