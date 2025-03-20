@@ -133,8 +133,14 @@
 }
 
 @layer utilities {
-  .safe-area-top {
-    padding-top: calc(24px + env(safe-area-inset-top))
+  .pt-header {
+    padding-top: 1.5rem;
+
+    @supports (padding: env(safe-area-inset-top)) {
+      @media (display-mode: standalone) {
+        padding-top: env(safe-area-inset-top);
+      }
+    }
   }
 }
 
