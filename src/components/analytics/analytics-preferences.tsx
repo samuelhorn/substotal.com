@@ -28,7 +28,6 @@ export default function AnalyticsPreferences() {
 
     return (
         <Card>
-
             <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="font-medium">Analytics Cookies</CardTitle>
                 <Switch

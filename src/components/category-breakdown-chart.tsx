@@ -24,8 +24,8 @@ import { convertAmount } from "@/lib/currency";
 import { formatCurrency } from "@/lib/utils";
 import { ChartTooltipWrapper } from "@/components/ui/chart-components";
 import { cn } from "@/lib/utils";
-import { loadChartViewMode, saveChartViewMode, type ChartViewMode } from '@/lib/settings';
-import { useSubscriptions } from "./subscription-context";
+import { useChartView } from '@/components/app-provider';
+import { useSubscriptions } from "./app-provider";
 import { Skeleton } from "./ui/skeleton";
 
 interface CategoryBreakdownChartProps {
@@ -40,18 +40,13 @@ export function CategoryBreakdownChart({
     exchangeRates
 }: CategoryBreakdownChartProps) {
     const { isLoading } = useSubscriptions();
-    const [viewMode, setViewMode] = useState<ChartViewMode>(() => loadChartViewMode());
     const [isClient, setIsClient] = useState(false);
+    const { setChartViewMode, chartViewMode } = useChartView();
 
     // Set isClient to true when component mounts
     useEffect(() => {
         setIsClient(true);
     }, []);
-
-    // Save viewMode to localStorage whenever it changes
-    useEffect(() => {
-        saveChartViewMode(viewMode);
-    }, [viewMode]);
 
     // Function to convert an amount to primary currency
     const convertToPrimary = (amount: number, fromCurrency: string) => {
@@ -59,17 +54,15 @@ export function CategoryBreakdownChart({
         return convertAmount(amount, fromCurrency, primaryCurrency, exchangeRates);
     };
 
-    // Prepare data for category breakdown chart
-    const categoryData = Object.entries(getSubscriptionsByCategory(subscriptions))
-        .map(([category, subs]) => ({
-            category,
-            value: subs.reduce((acc, sub) => {
-                const monthlyCost = calculateMonthlyCost(sub);
-                const convertedCost = convertToPrimary(monthlyCost, sub.currency);
-                return acc + (viewMode === 'monthly' ? convertedCost : convertedCost * 12);
-            }, 0),
-        }))
-        .sort((a, b) => b.value - a.value);
+    // Calculate category costs based on viewMode
+    const categoryData = Object.entries(getSubscriptionsByCategory(subscriptions)).map(([category, subs]) => ({
+        category,
+        value: subs.reduce((acc, sub) => {
+            const monthlyCost = calculateMonthlyCost(sub);
+            const convertedCost = convertToPrimary(monthlyCost, sub.currency);
+            return acc + (chartViewMode === 'monthly' ? convertedCost : convertedCost * 12);
+        }, 0)
+    })).sort((a, b) => b.value - a.value);
 
     // Custom tooltip component
     const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
@@ -85,7 +78,7 @@ export function CategoryBreakdownChart({
                         })}
                     </p>
                     <p className="text-sm text-gray-500">
-                        {viewMode === 'monthly' ? 'Monthly' : 'Yearly'} Cost
+                        {chartViewMode === 'monthly' ? 'Monthly' : 'Yearly'} Cost
                     </p>
                 </ChartTooltipWrapper>
             );
@@ -102,7 +95,7 @@ export function CategoryBreakdownChart({
                         <CardDescription className="mt-1">
                             {isClient && (
                                 <>
-                                    Your {viewMode === 'yearly' ? 'yearly' : 'monthly'} expenses by category
+                                    Your {chartViewMode === 'yearly' ? 'yearly' : 'monthly'} expenses by category
                                 </>
                             )}
                         </CardDescription>
@@ -116,9 +109,9 @@ export function CategoryBreakdownChart({
                                 {isClient && (
                                     <Switch
                                         id="view-mode"
-                                        checked={viewMode === 'yearly'}
+                                        checked={chartViewMode === 'yearly'}
                                         onCheckedChange={(checked) =>
-                                            setViewMode(checked ? 'yearly' : 'monthly')
+                                            setChartViewMode(checked ? 'yearly' : 'monthly')
                                         }
                                     />
                                 )}

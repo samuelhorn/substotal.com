@@ -21,7 +21,7 @@ import { formatCurrency } from "@/lib/utils";
 import { ChartTooltipWrapper } from "@/components/ui/chart-components";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "motion/react";
-import { useSubscriptions } from "./subscription-context";
+import { useSubscriptions } from "@/components/app-provider";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface UpcomingPaymentsChartProps {
@@ -57,7 +57,7 @@ export function UpcomingPaymentsChart({
 
     // Filter out hidden subscriptions and calculate upcoming payments for timeline
     subscriptions.filter(sub => !sub.hidden).forEach(sub => {
-        const startDate = new Date(sub.startDate);
+        const startDate = new Date(sub.start_date);
 
         // For monthly subscriptions
         if (sub.frequency === "monthly") {

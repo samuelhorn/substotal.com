@@ -3,12 +3,15 @@ import { Gabarito } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider"
-import { CurrencyProvider } from "@/components/currency-context";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
 import { ErrorBoundary } from "@/components/error-boundary";
 import GoogleAnalyticsProvider from "@/components/analytics/google-analytics";
 import ConsentBanner from "@/components/analytics/consent-banner";
+import { AppProvider } from "@/components/app-provider";
+import { SignInSuccessHandler } from "@/components/sign-in-success-handler";
+import { DataMergeDialog } from "@/components/data-merge-dialog";
+import { Suspense } from "react";
 
 const gabarito = Gabarito({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
@@ -33,26 +36,31 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning className="scroll-smooth">
-      <body className={`${gabarito.className} antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <CurrencyProvider>
-            <ErrorBoundary>
-              <Header />
-              <main className="container mx-auto">
-                {children}
-              </main>
-              <Footer />
-              <Toaster />
-              <GoogleAnalyticsProvider measurementId={GA_MEASUREMENT_ID} />
-              <ConsentBanner />
-            </ErrorBoundary>
-          </CurrencyProvider>
-        </ThemeProvider>
+      <body className={`${gabarito.className} antialiased min-h-dvh flex flex-col`}>
+        <Suspense fallback={<div>Loading...</div>}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <AppProvider>
+              <ErrorBoundary>
+                {/* Add SignInSuccessHandler to detect when a user just signed in */}
+                <SignInSuccessHandler />
+                <DataMergeDialog />
+                <Header />
+                <main className="container mx-auto grow flex flex-col justify-center">
+                  {children}
+                </main>
+                <Footer />
+                <Toaster />
+                <GoogleAnalyticsProvider measurementId={GA_MEASUREMENT_ID} />
+                <ConsentBanner />
+              </ErrorBoundary>
+            </AppProvider>
+          </ThemeProvider>
+        </Suspense>
       </body>
     </html>
   );

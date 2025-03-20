@@ -1,5 +1,4 @@
 "use client";
-
 import {
     CalendarDays,
     CalendarRange,
@@ -14,9 +13,7 @@ import {
 import { formatCurrency } from "@/lib/utils";
 import { motion, useSpring, useMotionValue, useTransform } from "motion/react";
 import { useEffect } from "react";
-
-import { useSubscriptions } from "@/components/subscription-context";
-import { useCurrency } from "@/components/currency-context";
+import { useSubscriptions, useCurrency } from "@/components/app-provider";
 import { Skeleton } from "./ui/skeleton";
 
 // Animated counter component
@@ -24,7 +21,6 @@ function AnimatedCounter({ value, formatter, isLoading }: { value: number; forma
     // Increased stiffness and reduced damping even more for ~50% faster animation
     const springValue = useSpring(0, { stiffness: 800, damping: 50 });
     const displayValue = useMotionValue(0);
-
     // Transform the animated value to formatted string, ensuring it never goes below zero
     const formattedValue = useTransform(displayValue, (latest) => {
         // Clamp the value to prevent it from going below zero
@@ -50,8 +46,6 @@ function AnimatedCounter({ value, formatter, isLoading }: { value: number; forma
     return <motion.div className="text-6xl xl:text-7xl 2xl:text-8xl font-bold">{formattedValue}</motion.div>;
 }
 
-
-
 export function SubscriptionSummarySection() {
     const { subscriptions, isLoading } = useSubscriptions();
     const { primaryCurrency, exchangeRates } = useCurrency();
@@ -59,7 +53,6 @@ export function SubscriptionSummarySection() {
     const formatCurrencyForDisplay = (amount: number) => {
         // Force to whole numbers for summary cards by rounding
         const roundedAmount = Math.round(amount);
-
         // Use consistent formatting with our utility
         return formatCurrency(roundedAmount, primaryCurrency, {
             showDecimals: false, // Don't show decimals in the cards
@@ -85,7 +78,6 @@ export function SubscriptionSummarySection() {
                     </p>
                 </CardContent>
             </Card>
-
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle>Yearly Cost</CardTitle>
@@ -98,7 +90,6 @@ export function SubscriptionSummarySection() {
                     </p>
                 </CardContent>
             </Card>
-
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle>Locked-In Cost</CardTitle>
