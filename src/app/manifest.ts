@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
         short_name: 'substotal',
         description: 'A simple app to track your recurring subscriptions',
         start_url: '/',
-        display: 'fullscreen',
+        display: 'standalone',
         background_color: '#1e1812',
         theme_color: '#F7EBAF',
         orientation: 'portrait',
