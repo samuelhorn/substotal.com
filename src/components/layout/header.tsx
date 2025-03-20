@@ -12,7 +12,7 @@ export function Header({
 }: HeaderProps) {
 
     return (
-        <header className="flex justify-between items-center container py-6">
+        <header className="flex justify-between items-center container py-6 safe-area-top">
             <Link href="/" className="text-2xl sm:text-3xl font-semibold tracking-tight">
                 substotal
             </Link>

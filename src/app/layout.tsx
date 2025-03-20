@@ -51,7 +51,7 @@ export default function RootLayout({
       <Head>
         <meta name="apple-mobile-web-app-title" content="substotal" />
       </Head>
-      <body className={`${gabarito.className} antialiased min-h-dvh flex flex-col safe-area-top`}>
+      <body className={`${gabarito.className} antialiased min-h-dvh flex flex-col`}>
         <Suspense fallback={<div>Loading...</div>}>
           <ThemeProvider
             attribute="class"
