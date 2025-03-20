@@ -273,6 +273,14 @@ export function exportAppState(): string {
 }
 
 /**
+ * Export app state as a JSON string, including data from Supabase if userId is provided
+ */
+export async function exportAppStateAsync(userId: string): Promise<string> {
+    const state = await loadAppStateAsync(userId);
+    return JSON.stringify(state, null, 2);
+}
+
+/**
  * Import app state from a JSON string
  * Returns true if successful, false otherwise
  */
@@ -308,6 +316,44 @@ export function importAppState(jsonData: string): boolean {
 
         // Save the imported state
         saveAppState(importedState);
+        return true;
+    } catch (error) {
+        console.error('Error importing app state:', error);
+        return false;
+    }
+}
+
+/**
+ * Import app state from a JSON string and sync with Supabase if userId is provided
+ * Returns true if successful, false otherwise
+ */
+export async function importAppStateAsync(jsonData: string, userId: string): Promise<boolean> {
+    try {
+        const state = JSON.parse(jsonData);
+        // Validate basic structure
+        if (!state || typeof state !== 'object') {
+            return false;
+        }
+        // Validate required properties
+        if (!Array.isArray(state.subscriptions) || !state.settings) {
+            return false;
+        }
+        // Validate subscriptions structure
+        for (const sub of state.subscriptions) {
+            if (!sub.id || !sub.name || !sub.amount || !sub.currency || !sub.frequency) {
+                return false;
+            }
+        }
+        // Merge with default settings to ensure all required settings exist
+        const importedState: AppState = {
+            subscriptions: state.subscriptions,
+            settings: {
+                ...defaultSettings,
+                ...state.settings
+            }
+        };
+        // Save the imported state both locally and to Supabase
+        await saveAppStateAsync(importedState, userId);
         return true;
     } catch (error) {
         console.error('Error importing app state:', error);

@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { HandCoins, Lightbulb, Lock, Orbit } from "lucide-react";
 import { StarRating } from "@/components/star-rating";
+import { TestimonialsSection } from "@/components/sections/testimonials-section";
+import { Avatar } from "@radix-ui/react-avatar";
+import Image from "next/image";
 
 const metaTitle = "Substotal - Track Your Subscriptions and Save Money";
 const metaDescription = "Manage all your subscriptions in one place. No account required, completely private, and forever free.";
@@ -32,7 +35,6 @@ export default function LandingPage() {
     <div className="space-y-8">
       {/* Hero Section */}
       <header className="container mx-auto px-4 pt-24 pb-16 text-center">
-        <StarRating />
         <h1 className="text-5xl sm:text-7xl max-w-4xl mx-auto font-bold tracking-tighter mb-6">Track Your Subscriptions and Take Control of Your Spending</h1>
         <p className="text-lg sm:text-2xl text-muted-foreground max-w-2xl mx-auto mb-8">
           Manage all your subscriptions in one place.<br className="hidden sm:block" />No account required, completely private, and forever free.
@@ -44,6 +46,26 @@ export default function LandingPage() {
           <Button asChild variant="outline" size="lg" className="text-lg px-8">
             <a href="#how-it-works">See How It Works</a>
           </Button>
+        </div>
+        <div className="flex items-center justify-center gap-2 mt-12">
+          <div className="flex">
+            <Avatar className="w-12 h-12 -ml-5 border-4 border-background rounded-full">
+              <Image src="/images/therese.png" alt="Therese H." className="rounded-full" width={48} height={48} />
+            </Avatar>
+            <Avatar className="w-12 h-12 -ml-5 border-4 border-background rounded-full">
+              <Image src="/images/marcus.png" alt="Mercus O." className="rounded-full" width={48} height={48} />
+            </Avatar>
+            <Avatar className="w-12 h-12 -ml-5 border-4 border-background rounded-full">
+              <Image src="/images/elin.png" alt="Elin J." className="rounded-full" width={48} height={48} />
+            </Avatar>
+            <Avatar className="w-12 h-12 -ml-5 border-4 border-background rounded-full">
+              <Image src="/images/mikael.png" alt="Mikael K." className="rounded-full" width={48} height={48} />
+            </Avatar>
+          </div>
+          <div className="flex flex-col gap-1 items-start">
+            <StarRating />
+            <p className="text-xs text-muted-foreground text-left leading-none">Loved by a growing<br />user community</p>
+          </div>
         </div>
       </header>
 
@@ -126,44 +148,7 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials */}
-      <section>
-        <div className="bg-card rounded-2xl py-12 lg:p-16">
-          <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-bold mb-12 text-center">Why People Choose Substotal</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-              <Card className="bg-background">
-                <CardContent className="pt-6">
-                  <StarRating />
-                  <p className="italic mb-4">
-                    &quot;I had no idea I was spending almost $300 a month on subscriptions until I used Substotal.
-                    I&apos;ve already cut over $85 in monthly expenses!&quot;
-                  </p>
-                  <p className="text-muted-foreground">— Eric S.</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-background">
-                <CardContent className="pt-6">
-                  <StarRating />
-                  <p className="italic mb-4">
-                    &quot;As someone who values privacy, I love that Substotal works without an account
-                    and keeps my data on my device.&quot;
-                  </p>
-                  <p className="text-muted-foreground">— Maria L.</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-background">
-                <CardContent className="pt-6">
-                  <StarRating />
-                  <p className="italic mb-4">
-                    &quot;The simplest way to track subscriptions I&apos;ve found. No bloat, just what I need.&quot;
-                  </p>
-                  <p className="text-muted-foreground">— John P.</p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
+      <TestimonialsSection />
 
       {/* Subscription Categories */}
       <section className="py-16 container mx-auto px-4">
@@ -239,28 +224,28 @@ export default function LandingPage() {
             <AccordionItem value="item-1">
               <AccordionTrigger className="text-2xl font-bold">Is Substotal really free?</AccordionTrigger>
               <AccordionContent>
-                Yes, Substotal is completely free to use. We don&apos;t collect your data or show ads.
+                Yes, Substotal is currently completely free to use. We believe in providing a tool that helps you manage your finances without any cost. If you find value in it, consider sharing it with others or leaving a review.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-2">
               <AccordionTrigger className="text-2xl font-bold">Do I need to create an account?</AccordionTrigger>
               <AccordionContent>
-                No. Substotal works entirely in your browser without requiring an account or login.
+                No. Substotal works entirely in your browser without requiring an account or login. However, you can create an account to sync your data across devices.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-3">
               <AccordionTrigger className="text-2xl font-bold">Where is my data stored?</AccordionTrigger>
               <AccordionContent>
-                All your subscription data is stored locally on your device. We have no servers storing your personal information.
+                If you use Substotal without an account, all your subscription data is stored locally on your device. If you create an account, your data is securely stored in <a className="text-foreground underline" target="_blank" href="https://supabase.com">Supabase</a> cloud storage.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-4">
               <AccordionTrigger className="text-2xl font-bold">Can I export my data?</AccordionTrigger>
               <AccordionContent>
-                Yes, you can export your subscription data as a CSV file for backup or analysis in other tools.
+                Yes, you can export your subscription data as a JSON file for backup or analysis in other tools.
               </AccordionContent>
             </AccordionItem>
 
@@ -285,7 +270,7 @@ export default function LandingPage() {
       <section className="bg-accent text-accent-foreground py-16 rounded-2xl">
         <div className="max-w-3xl mx-auto px-6 text-center text-balance">
           <h2 className="text-4xl sm:text-5xl font-bold mb-6">Start Managing Your Subscriptions Today</h2>
-          <p className="text-xl mb-8">Join thousands of users who have taken control of their subscription expenses with Substotal.</p>
+          <p className="text-xl mb-8">Join a growing community of users taking charge of their subscription expenses with Substotal!</p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link href="/subscriptions">
               <Button size="lg" className="text-lg px-8">Track Your Subscriptions Now</Button>
