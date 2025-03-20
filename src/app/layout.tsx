@@ -12,6 +12,7 @@ import { AppProvider } from "@/components/app-provider";
 import { SignInSuccessHandler } from "@/components/sign-in-success-handler";
 import { DataMergeDialog } from "@/components/data-merge-dialog";
 import { Suspense } from "react";
+import Head from "next/head";
 
 const gabarito = Gabarito({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
@@ -36,6 +37,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning className="scroll-smooth">
+      <Head>
+        <meta name="apple-mobile-web-app-title" content="substotal" />
+      </Head>
       <body className={`${gabarito.className} antialiased min-h-dvh flex flex-col`}>
         <Suspense fallback={<div>Loading...</div>}>
           <ThemeProvider
