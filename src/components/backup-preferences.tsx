@@ -59,7 +59,7 @@ export function BackupPreferences() {
     }
 
     return (
-        <>
+        <div className="flex flex-col gap-4">
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="font-medium">Export Subscription Data</CardTitle>
@@ -91,7 +91,7 @@ export function BackupPreferences() {
                             placeholder="Paste your backup data here to import..."
                             value={importData}
                             onChange={(e) => setImportData(e.target.value)}
-                            className="w-full h-[100px] p-2 rounded-md border"
+                            className="bg-background w-full h-[100px] p-2 rounded-md border"
                         />
                     </div>
                 </CardContent>
@@ -102,6 +102,6 @@ export function BackupPreferences() {
                     </Button>
                 </CardFooter>
             </Card>
-        </>
+        </div>
     )
 }

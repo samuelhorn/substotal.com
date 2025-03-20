@@ -1,7 +1,7 @@
 import { signOutAction } from "@/app/actions";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CloudIcon, CloudOffIcon, UserIcon, LogOut, LogIn, UserPlus } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import {
@@ -14,10 +14,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { HeaderAuthShared } from "@/components/header-auth-shared";
 
-
 export async function AuthButton() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
+
+    // Fetch user profile if user is authenticated
+    let profile = null;
+    if (user) {
+        try {
+            const { data } = await supabase
+                .from('profiles')
+                .select('full_name, avatar_url')
+                .eq('id', user.id)
+                .single();
+            profile = data;
+        } catch (error) {
+            console.error('Error fetching user profile:', error);
+        }
+    }
 
     return user ? (
         <div className="flex items-center gap-4">
@@ -25,14 +39,19 @@ export async function AuthButton() {
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Avatar className="h-10 w-10 cursor-pointer">
-                            <AvatarFallback className="w-10 h-10">{user.email?.[0].toUpperCase()}</AvatarFallback>
+                            {profile?.avatar_url ? (
+                                <AvatarImage src={profile.avatar_url} alt={profile?.full_name || user.email || ""} />
+                            ) : null}
+                            <AvatarFallback className="w-10 h-10">
+                                {profile?.full_name ? profile.full_name[0].toUpperCase() : user.email?.[0].toUpperCase()}
+                            </AvatarFallback>
                         </Avatar>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="min-w-64">
                         <DropdownMenuLabel>
                             <div className="flex items-center gap-2 justify-between">
                                 <div>
-                                    <div>{user.email}</div>
+                                    <div className="text-sm">{profile?.full_name || user.email}</div>
                                     <div className="text-muted-foreground">Using cloud storage</div>
                                 </div>
                                 <CloudIcon className="h-7 w-7 text-muted-foreground" />
