@@ -19,12 +19,23 @@ const gabarito = Gabarito({ subsets: ["latin"], weight: ["400", "600", "700"] })
 export const metadata: Metadata = {
   title: "Subscription Tracker",
   description: "A simple app to track your recurring subscriptions",
+  appleWebApp: {
+    title: "substotal",
+    statusBarStyle: "black-translucent",
+    capable: true,
+    startupImage: [
+      {
+        url: "/web-app-manifest-512x512.png",
+      },
+    ],
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#ffffff",
+  themeColor: "#F7EBAF",
+  viewportFit: "cover",
 };
 
 // Replace with your actual Google Analytics measurement ID
