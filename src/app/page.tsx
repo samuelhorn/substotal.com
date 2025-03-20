@@ -39,17 +39,17 @@ export default function LandingPage() {
         <p className="text-lg sm:text-2xl text-muted-foreground max-w-2xl mx-auto mb-8">
           Manage all your subscriptions in one place. Use privately with no account, or sign up and sync across all your devices.
         </p>
-        <div className="flex flex-wrap gap-4 justify-center">
-          <Button size="lg" className="text-lg px-8">
+        <div className="flex flex-wrap gap-2 justify-center">
+          <Button size="lg" className="text-md font-semibold px-8">
             <Link href="/subscriptions">
               Go to Dashboard
             </Link>
           </Button>
-          <Button asChild variant="outline" size="lg" className="text-lg px-8">
+          <Button asChild variant="outline" size="lg" className="text-md font-semibold px-8">
             <Link href="/sign-up">Sign Up</Link>
           </Button>
         </div>
-        <Button asChild variant="link" size="lg" className="text-lg px-8 mt-4">
+        <Button asChild variant="link" size="lg" className="text-md font-semibold px-8 mt-2">
           <a href="#how-it-works">See How It Works</a>
         </Button>
         <div className="flex items-center justify-center gap-2 mt-12">
