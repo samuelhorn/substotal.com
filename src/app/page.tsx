@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     description: metaDescription,
     images: [
       {
-        url: "/home-og.png",
+        url: "/og.png",
         width: 2400,
         height: 1260,
         alt: "Substotal - Subscription Tracker",

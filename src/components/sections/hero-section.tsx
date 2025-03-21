@@ -29,19 +29,19 @@ export function HeroSection() {
             <div className="flex items-center justify-center gap-2 mt-12">
                 <div className="flex">
                     <Avatar className="w-12 h-12 -ml-5 border-4 border-background rounded-full">
-                        <Image src="/images/therese.png" alt="Therese H." className="rounded-full" width={48} height={48} />
+                        <Image src="/images/therese.jpg" alt="Therese H." className="rounded-full" width={48} height={48} />
                     </Avatar>
                     <Avatar className="w-12 h-12 -ml-5 border-4 border-background rounded-full">
-                        <Image src="/images/marcus.png" alt="Mercus O." className="rounded-full" width={48} height={48} />
+                        <Image src="/images/marcus.jpg" alt="Mercus O." className="rounded-full" width={48} height={48} />
                     </Avatar>
                     <Avatar className="w-12 h-12 -ml-5 border-4 border-background rounded-full">
-                        <Image src="/images/elin.png" alt="Elin J." className="rounded-full" width={48} height={48} />
+                        <Image src="/images/elin.jpg" alt="Elin J." className="rounded-full" width={48} height={48} />
                     </Avatar>
                     <Avatar className="w-12 h-12 -ml-5 border-4 border-background rounded-full">
-                        <Image src="/images/pierre-yves.png" alt="Pierre-Yves R." className="rounded-full" width={48} height={48} />
+                        <Image src="/images/pierre-yves.jpg" alt="Pierre-Yves R." className="rounded-full" width={48} height={48} />
                     </Avatar>
                     <Avatar className="w-12 h-12 -ml-5 border-4 border-background rounded-full">
-                        <Image src="/images/mikael.png" alt="Mikael K." className="rounded-full" width={48} height={48} />
+                        <Image src="/images/mikael.jpg" alt="Mikael K." className="rounded-full" width={48} height={48} />
                     </Avatar>
                 </div>
                 <div className="flex flex-col gap-1 items-start">

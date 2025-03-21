@@ -31,7 +31,7 @@ export function TestimonialsSection() {
                             <CarouselContent>
                                 <CarouselItem className="md:basis-1/2 lg:basis-1/3">
                                     <ReviewCard
-                                        avatar="/images/therese.png"
+                                        avatar="/images/therese.jpg"
                                         quote="I had no idea I was spending almost $300 a month on subscriptions until I used Substotal.
               I&apos;ve already cut over $85 in monthly expenses!"
                                         name="Therese H."
@@ -39,7 +39,7 @@ export function TestimonialsSection() {
                                 </CarouselItem>
                                 <CarouselItem className="md:basis-1/2 lg:basis-1/3">
                                     <ReviewCard
-                                        avatar="/images/marcus.png"
+                                        avatar="/images/marcus.jpg"
                                         quote="As someone who values privacy, I love that Substotal works without an account
               and keeps my data on my device."
                                         name="Marcus O."
@@ -47,14 +47,14 @@ export function TestimonialsSection() {
                                 </CarouselItem>
                                 <CarouselItem className="md:basis-1/2 lg:basis-1/3">
                                     <ReviewCard
-                                        avatar="/images/mikael.png"
+                                        avatar="/images/mikael.jpg"
                                         quote="The simplest way to track subscriptions I&apos;ve found. No bloat, just what I need."
                                         name="Mikael K."
                                     />
                                 </CarouselItem>
                                 <CarouselItem className="md:basis-1/2 lg:basis-1/3">
                                     <ReviewCard
-                                        avatar="/images/elin.png"
+                                        avatar="/images/elin.jpg"
                                         quote="Perfect for tracking family subscriptions! We discovered we were paying for duplicate streaming services and saved instantly."
                                         name="Elin J."
                                     />
