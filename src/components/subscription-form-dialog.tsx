@@ -101,13 +101,6 @@ export function SubscriptionFormDialog({
         ? "Edit your subscription details."
         : "Add a new subscription to track.";
 
-
-    useEffect(() => {
-        form.setValue("currency", primaryCurrency);
-        /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    }, [primaryCurrency]);
-
-
     const form = useForm<SubscriptionFormValues>({
         resolver: zodResolver(formSubscriptionSchema),
         defaultValues: {
@@ -122,6 +115,15 @@ export function SubscriptionFormDialog({
             url: subscription?.url || "",
         },
     });
+
+    // Ensure primary currency is always set when it changes
+    useEffect(() => {
+        // Only set the currency if we're not editing an existing subscription
+        // or if the currency field hasn't been manually changed yet
+        if (!isEditing || !form.getValues("currency")) {
+            form.setValue("currency", primaryCurrency || "USD");
+        }
+    }, [primaryCurrency, form, isEditing]);
 
     // Reset form when subscription changes
     useEffect(() => {
