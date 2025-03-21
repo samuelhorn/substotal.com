@@ -184,7 +184,6 @@ export function SubscriptionFormDialog({
                         </FormItem>
                     )}
                 />
-
                 <FormField
                     control={form.control}
                     name="url"
@@ -200,7 +199,22 @@ export function SubscriptionFormDialog({
                                     onChange={(e) => {
                                         // Handle empty string correctly
                                         const value = e.target.value;
-                                        field.onChange(value === "" ? "" : value);
+
+                                        // If value is empty, set to empty string
+                                        if (value === "") {
+                                            field.onChange("");
+                                            return;
+                                        }
+
+                                        // Check if the value looks like a domain without protocol
+                                        if (value && !value.startsWith('http://') && !value.startsWith('https://') &&
+                                            !value.includes(' ') && (value.includes('.') || value.includes('localhost'))) {
+                                            // Add https:// prefix
+                                            field.onChange(`https://${value}`);
+                                        } else {
+                                            // Pass the value as is
+                                            field.onChange(value);
+                                        }
                                     }}
                                 />
                             </FormControl>
@@ -208,7 +222,6 @@ export function SubscriptionFormDialog({
                         </FormItem>
                     )}
                 />
-
                 <div className="grid grid-cols-3 gap-4">
                     <FormField
                         control={form.control}
@@ -229,7 +242,6 @@ export function SubscriptionFormDialog({
                             </FormItem>
                         )}
                     />
-
                     <FormField
                         control={form.control}
                         name="currency"
@@ -257,7 +269,6 @@ export function SubscriptionFormDialog({
                             </FormItem>
                         )}
                     />
-
                     <FormField
                         control={form.control}
                         name="frequency"
@@ -283,9 +294,6 @@ export function SubscriptionFormDialog({
                         )}
                     />
                 </div>
-
-
-
                 <FormField
                     control={form.control}
                     name="category"
@@ -313,7 +321,6 @@ export function SubscriptionFormDialog({
                         </FormItem>
                     )}
                 />
-
                 <FormField
                     control={form.control}
                     name="start_date"
@@ -349,7 +356,6 @@ export function SubscriptionFormDialog({
                         </FormItem>
                     )}
                 />
-
                 <FormField
                     control={form.control}
                     name="commitment_end_date"
@@ -385,7 +391,6 @@ export function SubscriptionFormDialog({
                         </FormItem>
                     )}
                 />
-
                 <DialogFooter>
                     <Button type="submit">
                         {isEditing ? "Save Changes" : "Add Subscription"}
