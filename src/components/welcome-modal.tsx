@@ -208,6 +208,12 @@ export function WelcomeModal() {
         }
     };
 
+    // Handle navigation to sign-in page
+    const handleSignInClick = () => {
+        setShowCloudDialog(false);
+        router.push('/sign-in');
+    };
+
     // Don't show anything until we've completed the initial data check
     // This prevents the modal from briefly flashing during page load
     if (isLoading || isLoadingSubscriptions || !initialCheckComplete.current) {
@@ -269,7 +275,7 @@ export function WelcomeModal() {
                             <CloudOffIcon />
                             Continue Locally
                         </Button>
-                        <Button size="sm" onClick={() => router.push('/sign-in')}>
+                        <Button size="sm" onClick={handleSignInClick}>
                             <CloudIcon />
                             Sign in to Cloud Storage
                         </Button>
