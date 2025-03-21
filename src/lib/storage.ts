@@ -1,6 +1,6 @@
 import { Subscription } from "./subscriptions";
 import { UserSettings, defaultSettings } from "./settings-keys";
-import { createClient } from "./supabase/supabase";
+import { createClient } from "./supabase/client";
 
 export interface AppState {
     subscriptions: Subscription[];

@@ -9,7 +9,7 @@ import {
     updateSubscription as updateSubscriptionInStorage,
     deleteSubscription as deleteSubscriptionFromStorage,
 } from "@/lib/subscriptions";
-import { createClient } from "@/lib/supabase/supabase";
+import { createClient } from "@/lib/supabase/client";
 import { clearAppState, loadAppState } from "@/lib/storage";
 import {
     loadPrimaryCurrency,

@@ -1,5 +1,5 @@
 import { loadAppState, loadAppStateAsync, saveAppState, saveAppStateAsync } from "./storage";
-import { createClient } from "./supabase/supabase";
+import { createClient } from "./supabase/client";
 
 export type ChartViewMode = 'monthly' | 'yearly';
 
