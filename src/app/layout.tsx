@@ -13,6 +13,7 @@ import { SignInSuccessHandler } from "@/components/sign-in-success-handler";
 import { DataMergeDialog } from "@/components/data-merge-dialog";
 import { Suspense } from "react";
 import Head from "next/head";
+import { Fallback } from "@/components/fallback";
 
 const gabarito = Gabarito({ subsets: ["latin"], weight: ["400", "600", "700"] });
 
@@ -33,6 +34,8 @@ export const metadata: Metadata = {
     url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
   }
 };
+
+
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -55,16 +58,15 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="substotal" />
       </Head>
       <body className={`${gabarito.className} antialiased min-h-dvh flex flex-col`}>
-        <Suspense fallback={<div>Loading...</div>}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Suspense fallback={<Fallback />}>
             <AppProvider>
               <ErrorBoundary>
-                {/* Add SignInSuccessHandler to detect when a user just signed in */}
                 <SignInSuccessHandler />
                 <DataMergeDialog />
                 <Header />
@@ -77,8 +79,8 @@ export default function RootLayout({
                 <ConsentBanner />
               </ErrorBoundary>
             </AppProvider>
-          </ThemeProvider>
-        </Suspense>
+          </Suspense>
+        </ThemeProvider>
       </body>
     </html>
   );
