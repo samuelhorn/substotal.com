@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Settings } from 'lucide-react';
 import AnalyticsPreferences from './analytics/analytics-preferences';
 import { BackupPreferences } from './backup-preferences';
@@ -12,22 +12,17 @@ import {
     AccordionItem,
     AccordionTrigger
 } from '@/components/ui/accordion';
+import { DropdownMenuItem } from './ui/dropdown-menu';
 
 export function SettingsDialog() {
-    const [isOpen, setIsOpen] = useState(false)
-
-    const handleTriggerClick = (e: React.MouseEvent) => {
-        // Prevent event from bubbling up to parent dropdown
-        e.stopPropagation();
-        setIsOpen(true);
-    }
-
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <div className="flex items-center gap-2 w-full" onClick={handleTriggerClick}>
-                <Settings className="w-5 h-5" />
-                <span>Settings</span>
-            </div>
+        <Dialog>
+            <DialogTrigger asChild>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <Settings className="w-5 h-5" />
+                    <span>Settings</span>
+                </DropdownMenuItem>
+            </DialogTrigger>
             <DialogContent onClick={(e) => e.stopPropagation()} className="max-w-xl">
                 <DialogHeader>
                     <DialogTitle>Settings</DialogTitle>
