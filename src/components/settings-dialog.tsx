@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Settings } from 'lucide-react';
 import AnalyticsPreferences from './analytics/analytics-preferences';

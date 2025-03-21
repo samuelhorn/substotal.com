@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { AuthMenu } from "@/components/auth-menu";
-import { signOutAction } from "@/app/actions";
 
 export async function AuthButton() {
     const supabase = await createClient();
