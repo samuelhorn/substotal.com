@@ -178,7 +178,12 @@ export function SubscriptionFormDialog({
                         <FormItem>
                             <FormLabel>Name</FormLabel>
                             <FormControl>
-                                <Input placeholder="Netflix" {...field} />
+                                <Input
+                                    autoComplete="off"
+                                    aria-autocomplete="none"
+                                    placeholder="Netflix"
+                                    {...field}
+                                />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
