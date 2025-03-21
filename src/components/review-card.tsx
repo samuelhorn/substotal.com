@@ -9,7 +9,7 @@ export function ReviewCard({ avatar, quote, name }: {
     name: string
 }) {
     return (
-        <Card className="bg-background">
+        <Card className="bg-background h-full">
             <CardContent>
                 <div className="flex items-center gap-4">
                     <Avatar className="w-12 h-12">

@@ -38,6 +38,9 @@ export function HeroSection() {
                         <Image src="/images/elin.png" alt="Elin J." className="rounded-full" width={48} height={48} />
                     </Avatar>
                     <Avatar className="w-12 h-12 -ml-5 border-4 border-background rounded-full">
+                        <Image src="/images/pierre-yves.png" alt="Pierre-Yves R." className="rounded-full" width={48} height={48} />
+                    </Avatar>
+                    <Avatar className="w-12 h-12 -ml-5 border-4 border-background rounded-full">
                         <Image src="/images/mikael.png" alt="Mikael K." className="rounded-full" width={48} height={48} />
                     </Avatar>
                 </div>
